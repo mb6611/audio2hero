@@ -12,3 +12,4 @@ def merge(out_dir, *files):
 
 if __name__ == "__main__":
     merge("merged.ogg","guitar.ogg", "bass.ogg", "song.ogg")
+    
