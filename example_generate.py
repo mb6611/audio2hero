@@ -16,8 +16,6 @@ if __name__ == "__main__":
     model = Pop2PianoForConditionalGeneration.from_pretrained("sweetcocoa/pop2piano")
     processor = Pop2PianoProcessor.from_pretrained("sweetcocoa/pop2piano")
     tokenizer = Pop2PianoTokenizer.from_pretrained("sweetcocoa/pop2piano")
-    print(tokenizer.vocab_size)
-    exit()
 
     # load an example audio file and corresponding ground truth midi file
     audio, sr = librosa.load("./processed/audio/Mountain - Mississippi Queen.ogg", sr=44100)  # feel free to change the sr to a suitable value.
