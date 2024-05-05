@@ -6,8 +6,11 @@ lib64
 pyvenv.cfg
 share/
 
+# other repos
+pop2piano
+
 # data
 Maestro/
 
 # generated files
-output.mid
+*.mid
