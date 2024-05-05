@@ -4,3 +4,10 @@ include/
 lib/
 lib64
 pyvenv.cfg
+share/
+
+# data
+Maestro/
+
+# generated files
+output.mid
