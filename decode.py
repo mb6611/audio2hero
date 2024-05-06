@@ -26,11 +26,13 @@ def crop_midi(midi, start_beat, end_beat, extrapolated_beatsteps):
             out.instruments[0].notes.remove(note)
         # interpolate index of start note
 
-        lower = np.argmax(extrapolated_beatsteps[extrapolated_beatsteps <= note.start])
+        # lower = len(extrapolated_beatsteps[extrapolated_beatsteps <= note.start]) - 1
+        lower = np.searchsorted(extrapolated_beatsteps, note.start, side='left') - 1
         note.start = lower
         note.start = int(note.start - start_beat)
 
-        lower = np.argmax(extrapolated_beatsteps[extrapolated_beatsteps <= note.end])
+        lower = np.searchsorted(extrapolated_beatsteps, note.end, side='left') - 1
+        # lower = len(extrapolated_beatsteps[extrapolated_beatsteps <= note.end]) - 1
         note.end = lower
         note.end = int(note.end - start_beat)
         if note.end == note.start:
@@ -78,19 +80,23 @@ if __name__ == "__main__":
 
 
     # # convert the midi file to tokens
-    batches = [crop_midi(midi, i, i+8, inputs.extrapolated_beatstep[0]).instruments[0].notes for i in range(2, len(inputs.extrapolated_beatstep[0])-8, 8)]
+    # batches = [crop_midi(midi, i, i+8, inputs.extrapolated_beatstep[0]).instruments[0].notes for i in range(2, len(inputs.extrapolated_beatstep[0])-8, 8)]
+    batches = [crop_midi(midi, i, i+8, inputs.extrapolated_beatstep[0]).instruments[0].notes for i in range(2, len(inputs.extrapolated_beatstep[0])-10, 8)]
     print(batches[2])
     # # remove empty batches
     # batches = [batch for batch in batches if len(batch) > 0]
 
+    model_output = model.generate(inputs["input_features"], generation_config=model.generation_config, return_dict_in_generate=True, output_logits=True, )
+
     labels = []
     offset = 0
     for batch in batches:
-        print(f"outer offset: {offset}")
-        label, offset = encode_plus(tokenizer, batch, return_tensors="pt", time_offset=0)        
+        # print(f"outer offset: {offset}")
+        label, offset = encode_plus(tokenizer, batch, return_tensors="pt", time_offset=0)
         labels.append(label["token_ids"])
     labels = [np.append([0], np.append(label, [1, 0])) for label in labels]
-    longest_length = max([len(label) for label in labels])
+# longest_length = max([len(label) for label in labels])
+    longest_length = len(model_output.sequences[0])
     padded_labels = np.array([np.pad(label, (0, longest_length - len(label))) for label in labels])
     print(padded_labels[2])
 

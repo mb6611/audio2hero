@@ -8,6 +8,26 @@ from typing import List
 
 from decode import crop_midi
 
+def one_hot_convert(t_labels, vocab_size):
+    # Your vocabulary size
+    vocab_size = 2400
+
+    # Create a tensor to hold the one-hot encoded versions
+    one_hot_tensor = torch.zeros((*t_labels.shape, vocab_size))
+
+    # Iterate over each element of the original tensor
+    for i in range(t_labels.size(0)):
+        for j in range(t_labels.size(1)):
+            # Get the value from the original tensor
+            value = int(t_labels[i, j])
+            # One-hot encode the value
+            one_hot = torch.zeros(vocab_size)
+            one_hot[value] = 1
+            # Assign it to the corresponding position in the new tensor
+            one_hot_tensor[i, j] = one_hot
+    return one_hot_tensor
+
+
 class MIDILossCalculator:
 
     # def __init(self):
@@ -30,6 +50,22 @@ class MIDILossCalculator:
             ground_truth_midi_tokens
         ):
         pass
+
+def preprocess_labels(midi):
+    batches = [crop_midi(midi, i, i+8, inputs.extrapolated_beatstep[0]).instruments[0].notes for i in range(2, len(inputs.extrapolated_beatstep[0])-10, 8)]
+
+    labels = []
+    for batch in batches:
+        label, _ = encode_plus(tokenizer, batch, return_tensors="pt", time_offset=0)
+        labels.append(label["token_ids"])
+    labels = [np.append([0], np.append(label, [1, 0])) for label in labels]
+    gt_longest_length = max([len(label) for label in labels])
+
+    return labels, gt_longest_length
+
+def pad_labels(labels, longest_model_output):
+    padded_labels = np.array([np.pad(label, (0, longest_model_output - len(label))) for label in labels])
+    return padded_labels
 
 if __name__ == "__main__":
 
@@ -73,21 +109,33 @@ if __name__ == "__main__":
     ground_truth_midi_path = "./processed/piano_midi/Pat Benatar - Hit Me with Your Best Shot.mid"
     midi = pretty_midi.PrettyMIDI(ground_truth_midi_path)
 
+
+
+
     # convert the midi file to tokens
-    batches = [crop_midi(midi, i, i+8, inputs.extrapolated_beatstep[0]).instruments[0].notes for i in range(2, len(inputs.extrapolated_beatstep[0])-10, 8)]
+    # batches = [crop_midi(midi, i, i+8, inputs.extrapolated_beatstep[0]).instruments[0].notes for i in range(2, len(inputs.extrapolated_beatstep[0])-10, 8)]
 
-    # format labels as (batch_size, tokens_per_batch)
-    labels = []
-    offset = 0
-    for batch in batches:
-        print(f"outer offset: {offset}")
-        label, offset = encode_plus(tokenizer, batch, return_tensors="pt", time_offset=0)
-        labels.append(label["token_ids"])
+    # # format labels as (batch_size, tokens_per_batch)
+    # labels = []
+    # for batch in batches:
+    #     label, _ = encode_plus(tokenizer, batch, return_tensors="pt", time_offset=0)
+    #     labels.append(label["token_ids"])
+    # labels = [np.append([0], np.append(label, [1, 0])) for label in labels]
 
-    labels = [np.append([0], np.append(label, [1, 0])) for label in labels]
-    longest_length = max([len(label) for label in labels])
+    # gt_longest_length = max([len(label) for label in labels])
+
+    labels, gt_longest_length = preprocess_labels(midi)
+
+
+    model_output = model.generate(inputs["input_features"], generation_config=model.generation_config, return_dict_in_generate=True, output_logits=True, min_new_tokens=gt_longest_length)
+
+
+    padded_labels = pad_labels(labels, gt_longest_length)
+
+
+    # longest_length = len(model_output.sequences[0])
+    # print(longest_length)
     # padded_labels = np.array([np.pad(label, (0, longest_length - len(label))) for label in labels])
-    padded_labels = torch.Tensor(np.array([np.pad(label, (0, longest_length - len(label))) for label in labels]))
     # print(padded_labels[2])
 
 
@@ -115,16 +163,27 @@ if __name__ == "__main__":
         )
 
     print(model_output.sequences.shape)
-    print(np.array(labels["token_ids"]).shape)
+    print(np.array(padded_labels).shape)
     print(len(model_output["logits"]))
     print(np.array(model_output["logits"]).shape)
     logits = torch.Tensor(np.array(model_output["logits"]))
 
     # format logits to (
     # logits = logits.reshape(logits.shape[1], logits.shape[0], logits.shape[2])
+    logits = torch.stack(model_output.logits).transpose(0,1)
+    t_labels = torch.tensor(padded_labels)
+    t_labels = t_labels[:,1:]
+    print("One hotting labels...")
+    one_hot = one_hot_convert(t_labels, 2400)
+    print("One hotted labels.\n")
 
-    midi_loss = MidiLossCalculator.cross_entropy_loss(logits, padded_labels)
+    print(logits.shape)
+    print(one_hot.shape)
+    exit()
+
+    midi_loss = MidiLossCalculator.cross_entropy_loss(logits, one_hot)
     print(midi_loss)
+
 
 
 
