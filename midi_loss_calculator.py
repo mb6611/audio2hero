@@ -91,7 +91,8 @@ if __name__ == "__main__":
     # audio_path = "./processed/audio/Mountain - Mississippi Queen.ogg"
 
     print("Loading audio file...")
-    audio_path = "./processed/audio/Pat Benatar - Hit Me with Your Best Shot.ogg"
+    # audio_path = "./processed/audio/Pat Benatar - Hit Me with Your Best Shot.ogg"
+    audio_path = "./processed/audio/Aerosmith - Same Old Song & Dance.ogg"
     audio, sr = librosa.load(audio_path, sr=44100)  # feel free to change the sr to a suitable value.
     # audio, sr = librosa.load(audio_path, sr=22050)  # feel free to change the sr to a suitable value.
     print("Loaded audio file.\n")
@@ -107,7 +108,8 @@ if __name__ == "__main__":
     # midi = pretty_midi.PrettyMIDI("./processed/midi/Mountain - Mississippi Queen.mid")
     # ground_truth_midi_path = "mountain_out_gen.mid"
     print("Encoding ground truth midi file...")
-    ground_truth_midi_path = "./processed/piano_midi/Pat Benatar - Hit Me with Your Best Shot.mid"
+    # ground_truth_midi_path = "./processed/audio/Aerosmith - Same Old Song and Dance.ogg"
+    ground_truth_midi_path = "./processed/piano_midi/Aerosmith - Same Old Song & Dance.mid"
     midi = pretty_midi.PrettyMIDI(ground_truth_midi_path)
 
 
@@ -135,7 +137,7 @@ if __name__ == "__main__":
     padded_labels = pad_labels(labels, longest_length)
 
 
-    # 
+    #
     # print(longest_length)
     # padded_labels = np.array([np.pad(label, (0, longest_length - len(label))) for label in labels])
     # print(padded_labels[2])
@@ -154,7 +156,7 @@ if __name__ == "__main__":
 
     # generate model output
     print("Generating output...")
-    model_output = model.generate(inputs["input_features"], output_logits=True, return_dict_in_generate=True)
+    # model_output = model.generate(inputs["input_features"], output_logits=True, return_dict_in_generate=True)
     print("Completed generation.\n")
 
     # decode model output
@@ -181,6 +183,7 @@ if __name__ == "__main__":
 
     print(logits.shape)
     print(one_hot.shape)
+    print(logits)
 
     midi_loss = MidiLossCalculator.cross_entropy_loss(logits, one_hot)
     print(midi_loss)
