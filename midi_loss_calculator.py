@@ -51,7 +51,7 @@ class MIDILossCalculator:
         ):
         pass
 
-def preprocess_labels(midi):
+def preprocess_labels(midi, inputs, tokenizer):
     batches = [crop_midi(midi, i, i+8, inputs.extrapolated_beatstep[0]).instruments[0].notes for i in range(2, len(inputs.extrapolated_beatstep[0])-10, 8)]
 
     labels = []
@@ -127,7 +127,7 @@ if __name__ == "__main__":
 
     # gt_longest_length = max([len(label) for label in labels])
 
-    labels, gt_longest_length = preprocess_labels(midi)
+    labels, gt_longest_length = preprocess_labels(midi, inputs, tokenizer)
 
 
     model_output = model.generate(inputs["input_features"], generation_config=model.generation_config, return_dict_in_generate=True, output_logits=True, min_new_tokens=gt_longest_length)
