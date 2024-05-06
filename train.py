@@ -12,8 +12,6 @@ from transformers import Pop2PianoForConditionalGeneration, Pop2PianoProcessor, 
 import sys
 sys.path.append("./pop2piano")
 
-from midi_tokenizer import MidiTokenizer
-
 # import matplotlib.pyplot as plt
 # import mido
 # import numpy as np
