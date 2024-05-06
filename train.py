@@ -85,8 +85,11 @@ if __name__ == "__main__":
         param.requires_grad_(True) # or False
     optimizer = torch.optim.SGD(model.parameters(), lr=lr, momentum=momentum)
 
+    # print number of parameters
+    print(f"Number of parameters: ", sum(p.numel() for p in model.parameters() if p.requires_grad))
+
     audio_dir = "./processed/audio/"
-    ground_truth_midi_dir = "./processed/piano_midi/"
+    ground_truth_midi_dir = "./processed/midi/"
     cache_dir = "./cache/preprocessed_labels/"
 
     song_names = os.listdir(audio_dir)
@@ -95,7 +98,8 @@ if __name__ == "__main__":
 
     for epoch in range(10):
       print(f"Epoch {epoch+1}")
-      for song_name in song_names[0:1]:
+      # for song_name in song_names[0:1]:
+      for song_name in song_names:
           audio_path = f"{audio_dir}{song_name}.ogg"
           ground_truth_midi_path = f"{ground_truth_midi_dir}{song_name}.mid"
           print(f"Audio file: {audio_path}")
@@ -152,11 +156,11 @@ if __name__ == "__main__":
 
 
           # decode model output
-          print("Decoding output...")
-          tokenizer_output = processor.batch_decode(
-                  token_ids=model_output.sequences,
-                  feature_extractor_output=inputs
-              )
+          # print("Decoding output...")
+          # tokenizer_output = processor.batch_decode(
+          #         token_ids=model_output.sequences,
+          #         feature_extractor_output=inputs
+          #     )
 
           logits = torch.stack(model_output.logits).transpose(0,1).requires_grad_()
           t_labels = torch.tensor(padded_labels)

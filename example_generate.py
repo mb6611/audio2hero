@@ -13,19 +13,22 @@ import pretty_midi
 if __name__ == "__main__":
 
     # load the pretrained model, processor, and tokenizer
-    model = Pop2PianoForConditionalGeneration.from_pretrained("sweetcocoa/pop2piano")
+    # model = Pop2PianoForConditionalGeneration.from_pretrained("sweetcocoa/pop2piano")
+    # load model from local
+    model = Pop2PianoForConditionalGeneration.from_pretrained("./audio2hero_230/")
     processor = Pop2PianoProcessor.from_pretrained("sweetcocoa/pop2piano")
     tokenizer = Pop2PianoTokenizer.from_pretrained("sweetcocoa/pop2piano")
 
     # load an example audio file and corresponding ground truth midi file
-    # audio, sr = librosa.load("./processed/audio/Mountain - Mississippi Queen.ogg", sr=44100)  # feel free to change the sr to a suitable value.
-    audio, sr = librosa.load("./processed/audio/Mountain - Mississippi Queen.ogg", sr=22050)  # feel free to change the sr to a suitable value.
+    audio, sr = librosa.load("./processed/audio/Mountain - Mississippi Queen.ogg", sr=44100)  # feel free to change the sr to a suitable value.
+    # audio, sr = librosa.load("./processed/audio/Mountain - Mississippi Queen.ogg", sr=22050)  # feel free to change the sr to a suitable value.
 
-    # inputs = processor(audio=audio, sampling_rate=sr, return_tensors="pt", resample=False)
-    inputs = processor(audio=audio, sampling_rate=sr, return_tensors="pt", resample=True)
+    inputs = processor(audio=audio, sampling_rate=sr, return_tensors="pt", resample=False)
+    # inputs = processor(audio=audio, sampling_rate=sr, return_tensors="pt", resample=True)
 
-    midi = pretty_midi.PrettyMIDI("./processed/midi/Mountain - Mississippi Queen.mid")
-    labels = tokenizer.encode_plus(midi.instruments[0].notes, return_tensors="pt")
+    # UNCOMMENT TO TEST TOKENIZER
+    # midi = pretty_midi.PrettyMIDI("./processed/midi/Mountain - Mississippi Queen.mid")
+    # labels = tokenizer.encode_plus(midi.instruments[0].notes, return_tensors="pt")
 
     # generate model output
     print("Generating output...")
