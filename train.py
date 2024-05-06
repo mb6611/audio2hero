@@ -87,8 +87,8 @@ if __name__ == "__main__":
     # tokenizer.save_pretrained("./cache/tokenizer")
 
     model.train()
-    lr=1e-6
-    momentum=0.0
+    lr=1e-5
+    momentum=0.5
     for param in model.parameters():
         param.requires_grad_(False)
 
@@ -97,8 +97,8 @@ if __name__ == "__main__":
       if any([layer in name for layer in ["block.5.layer.2.DenseReluDense.wo", "decoder.final_layer_norm", "lm_head"]]):
         parameter.requires_grad_(True)
 
-    optimizer = torch.optim.Adam(model.parameters(), lr=lr)
-    # optimizer = torch.optim.SGD(model.parameters(), lr=lr, momentum=momentum)
+    # optimizer = torch.optim.Adam(model.parameters(), lr=lr)
+    optimizer = torch.optim.SGD(model.parameters(), lr=lr, momentum=momentum)
 
     audio_dir = "./processed/audio/"
     ground_truth_midi_dir = "./processed/midi/"
@@ -187,7 +187,7 @@ if __name__ == "__main__":
             #           feature_extractor_output=inputs
             #       )
 
-            logits = torch.stack(model_output.logits).transpose(0,1).requires_grad_()
+            logits = torch.stack(model_output.logits).transpose(0,1)
             t_labels = torch.tensor(padded_labels).to(device)
             t_labels = t_labels[:,1:]
             one_hot = one_hot_convert(t_labels, 2400)
