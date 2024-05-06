@@ -56,7 +56,9 @@ if __name__ == "__main__":
 
     # load an example audio file and corresponding ground truth midi file
     # audio_path = "./processed/audio/Mountain - Mississippi Queen.ogg"
-    audio_path = "./processed/audio/Pat Benatar - Hit Me with Your Best Shot.ogg"
+    audio_path = "./processed/audio/Pearl Jam - Even Flow.ogg"
+    # audio_path = "./mountain_quantized.ogg"
+    # audio_path = "./processed/audio/Pat Benatar - Hit Me with Your Best Shot.ogg"
     audio, sr = librosa.load(audio_path, sr=44100)  # feel free to change the sr to a suitable value.
 
     sr = int(sr)
@@ -67,9 +69,11 @@ if __name__ == "__main__":
 
     # load ground truth midi file
     # midi = pretty_midi.PrettyMIDI("./processed/midi/Mountain - Mississippi Queen.mid")
-    # ground_truth_midi_path = "./processed/midi/Mountain - Mississippi Queen.mid"
-    # ground_truth_midi_path = "mountain_out_gen.mid"
-    ground_truth_midi_path = "./processed/piano_midi/Pat Benatar - Hit Me with Your Best Shot.mid"
+    # ground_truth_midi_path = "./mountain_quantized.mid"
+    # ground_truth_midi_path = "./clonehero/Mountain - Mississippi Queen/notes.mid"
+    ground_truth_midi_path = "./processed/midi/Pearl Jam - Even Flow.mid"
+    # ground_truth_midi_path = "./gh_mountain_single_tempo.mid"
+    # ground_truth_midi_path = "./processed/piano_midi/Pat Benatar - Hit Me with Your Best Shot.mid"
     midi = pretty_midi.PrettyMIDI(ground_truth_midi_path)
 
 
