@@ -16,7 +16,8 @@ pop2piano
 Maestro/
 
 # models
-cache/
+cache/*
+!cache/preprocessed_labels/
 
 # generated files
 

@@ -95,11 +95,11 @@ if __name__ == "__main__":
     # print(song_names)
     
     losses = []
-    for epoch in range(100):
+    for epoch in range(400):
       print(f"Epoch {epoch+1}")
       avg_loss = 0
       epoch_losses = []
-      for song_name in song_names[0:3]:
+      for song_name in song_names:
           audio_path = f"{audio_dir}{song_name}.ogg"
           ground_truth_midi_path = f"{ground_truth_midi_dir}{song_name}.mid"
           if not os.path.exists(audio_path) or not os.path.exists(ground_truth_midi_path):
@@ -185,5 +185,6 @@ if __name__ == "__main__":
             continue
       losses.append(epoch_losses)
       np.save("losses.npy", np.array(losses))
-      model.save_pretrained(f"./models/audio2hero_{epoch+1}")
+      if (epoch+1) % 5 == 0:
+        model.save_pretrained(f"./models/audio2hero_{epoch+1}")
       print("Average loss:", avg_loss/len(epoch_losses))
