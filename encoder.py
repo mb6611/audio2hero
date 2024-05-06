@@ -55,7 +55,6 @@ def encode_plus(
         tokens = []
         current_velocity = 0
         last_time = time_offset
-        print(last_time)
         for i, time in enumerate(times):
             if len(time) == 0:
                 continue
