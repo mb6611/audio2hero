@@ -55,7 +55,8 @@ def compute_metrics(eval_pred):
 
 if __name__ == "__main__":
 
-    MidiLossCalculator = MIDILossCalculator()
+    # MidiLossCalculator = MIDILossCalculator()
+    loss_fct = torch.nn.CrossEntropyLoss()
 
     # load the pretrained model, processor, and tokenizer
     # model = Pop2PianoForConditionalGeneration.from_pretrained("sweetcocoa/pop2piano")
@@ -83,9 +84,6 @@ if __name__ == "__main__":
     # model.save_pretrained("./cache/model")
     # processor.save_pretrained("./cache/processor")
     # tokenizer.save_pretrained("./cache/tokenizer")
-
-    # load an example audio file and corresponding ground truth midi file
-    # audio_path = "./processed/audio/Mountain - Mississippi Queen.ogg"
 
     model.train()
     lr=1e-6
@@ -191,7 +189,7 @@ if __name__ == "__main__":
             one_hot = one_hot_convert(t_labels, 2400)
             one_hot = one_hot.to(device)
 
-            midi_loss = MidiLossCalculator.cross_entropy_loss(logits, one_hot)
+            midi_loss = loss_fct(logits, one_hot)
             midi_loss.backward()
             optimizer.step()
 

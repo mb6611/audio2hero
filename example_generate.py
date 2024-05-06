@@ -2,6 +2,9 @@ import librosa
 from transformers import Pop2PianoForConditionalGeneration, Pop2PianoProcessor, Pop2PianoTokenizer, Pop2PianoConfig
 import pretty_midi
 from transformers import AutoConfig
+from undecorated import undecorated
+from types import MethodType
+from model_generate import generate
 
 # import matplotlib.pyplot as plt
 # import mido
@@ -19,9 +22,10 @@ if __name__ == "__main__":
     # og_model = Pop2PianoForConditionalGeneration.from_pretrained("sweetcocoa/pop2piano")
     # generation_config = og_model.generation_config
     # model = Pop2PianoForConditionalGeneration._from_config(config)
-    model = Pop2PianoForConditionalGeneration.from_pretrained("./models/audio2hero_base_110")
+    model = Pop2PianoForConditionalGeneration.from_pretrained("sweetcocoa/pop2piano")
     processor = Pop2PianoProcessor.from_pretrained("sweetcocoa/pop2piano")
     tokenizer = Pop2PianoTokenizer.from_pretrained("sweetcocoa/pop2piano")
+
 
     # load an example audio file and corresponding ground truth midi file
     # audio, sr = librosa.load("./processed/audio/Mountain - Mississippi Queen.ogg", sr=44100)  # feel free to change the sr to a suitable value.
@@ -35,7 +39,10 @@ if __name__ == "__main__":
 
     # generate model output
     print("Generating output...")
-    model_output = model.generate(inputs["input_features"], output_logits=True, return_dict_in_generate=True)
+    model.generation_config.output_logits = True
+    model.generation_config.return_dict_in_generate = True
+    model_output = generate(model,inputs["input_features"])
+    print(model_output)
     print("Completed generation.")
 
     # decode model output
