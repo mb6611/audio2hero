@@ -87,7 +87,7 @@ if __name__ == "__main__":
     # tokenizer.save_pretrained("./cache/tokenizer")
 
     model.train()
-    lr=1e-5
+    lr=1e-1
     momentum=0.5
     for param in model.parameters():
         param.requires_grad_(False)
@@ -196,6 +196,7 @@ if __name__ == "__main__":
             midi_loss = loss_fct(logits, one_hot)
             midi_loss.backward()
             optimizer.step()
+            
 
             avg_loss += midi_loss.item()
             epoch_losses.append(midi_loss.item())
