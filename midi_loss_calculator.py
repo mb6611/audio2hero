@@ -92,14 +92,15 @@ if __name__ == "__main__":
 
     print("Loading audio file...")
     audio_path = "./processed/audio/Pat Benatar - Hit Me with Your Best Shot.ogg"
-    # audio, sr = librosa.load(audio_path, sr=44100)  # feel free to change the sr to a suitable value.
-    audio, sr = librosa.load(audio_path, sr=22050)  # feel free to change the sr to a suitable value.
+    audio, sr = librosa.load(audio_path, sr=44100)  # feel free to change the sr to a suitable value.
+    # audio, sr = librosa.load(audio_path, sr=22050)  # feel free to change the sr to a suitable value.
     print("Loaded audio file.\n")
 
     sr = int(sr)
 
     # convert the audio file to tokens
-    inputs = processor(audio=audio, sampling_rate=sr, return_tensors="pt", resample=True)
+    # inputs = processor(audio=audio, sampling_rate=sr, return_tensors="pt", resample=True)
+    inputs = processor(audio=audio, sampling_rate=sr, return_tensors="pt")
 
 
     # load ground truth midi file
@@ -130,7 +131,8 @@ if __name__ == "__main__":
     model_output = model.generate(inputs["input_features"], generation_config=model.generation_config, return_dict_in_generate=True, output_logits=True, min_new_tokens=gt_longest_length)
 
 
-    padded_labels = pad_labels(labels, gt_longest_length)
+    longest_length = len(model_output.sequences[0])
+    padded_labels = pad_labels(labels, longest_length)
 
 
     # longest_length = len(model_output.sequences[0])
@@ -179,7 +181,6 @@ if __name__ == "__main__":
 
     print(logits.shape)
     print(one_hot.shape)
-    exit()
 
     midi_loss = MidiLossCalculator.cross_entropy_loss(logits, one_hot)
     print(midi_loss)
