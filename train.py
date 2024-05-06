@@ -68,12 +68,14 @@ if __name__ == "__main__":
     # model = Pop2PianoForConditionalGeneration.from_pretrained("./cache/model").to(device)
     # processor = Pop2PianoProcessor.from_pretrained("./cache/processor")
     # tokenizer = Pop2PianoTokenizer.from_pretrained("./cache/tokenizer")
-    config = Pop2PianoConfig.from_pretrained("sweetcocoa/pop2piano")
-    og_model = Pop2PianoForConditionalGeneration.from_pretrained("sweetcocoa/pop2piano")
-    generation_config = og_model.generation_config
-    model = Pop2PianoForConditionalGeneration._from_config(config).to(device)
-    processor = Pop2PianoProcessor.from_pretrained("sweetcocoa/pop2piano")
-    tokenizer = Pop2PianoTokenizer.from_pretrained("sweetcocoa/pop2piano")
+    # config = Pop2PianoConfig.from_pretrained("sweetcocoa/pop2piano")
+    # og_model = Pop2PianoForConditionalGeneration.from_pretrained("sweetcocoa/pop2piano")
+    # generation_config = og_model.generation_config
+    # model = Pop2PianoForConditionalGeneration._from_config(config).to(device)
+    model = Pop2PianoForConditionalGeneration.from_pretrained("./cache/model").to(device)
+    generation_config = model.generation_config
+    processor = Pop2PianoProcessor.from_pretrained("./cache/model")
+    tokenizer = Pop2PianoTokenizer.from_pretrained("./cache/model")
 
 
     print("Loaded pretrained model, processor, and tokenizer.\n")
@@ -89,7 +91,14 @@ if __name__ == "__main__":
     lr=1e-3
     momentum=0.5
     for param in model.parameters():
-        param.requires_grad_(True) # or False
+        param.requires_grad_(False)
+
+    # unfreeze last few layers
+    for name, parameter in model.named_parameters():
+      if any([layer in name for layer in ["block.5.layer.2.DenseReluDense.wo", "decoder.final_layer_norm", "lm_head"]]):
+        parameter.requires_grad_(True)
+
+    # optimizer = torch.optim.Adam(model.parameters(), lr=lr)
     optimizer = torch.optim.SGD(model.parameters(), lr=lr, momentum=momentum)
 
     audio_dir = "./processed/audio/"
