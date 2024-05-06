@@ -5,7 +5,6 @@ import librosa
 from midi_loss_calculator import MIDILossCalculator, one_hot_convert, preprocess_labels, pad_labels
 import numpy as np
 import os
-from omegaconf import OmegaConf
 import pickle
 import pretty_midi
 from transformers import Pop2PianoForConditionalGeneration, Pop2PianoProcessor, Pop2PianoTokenizer, TrainingArguments, Trainer
@@ -64,7 +63,9 @@ if __name__ == "__main__":
     # tokenizer = Pop2PianoTokenizer.from_pretrained("sweetcocoa/pop2piano")
 
     print("Loading pretrained model, processor, and tokenizer...")
-    model = Pop2PianoForConditionalGeneration.from_pretrained("./cache/model")
+    device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+    print(f"Device: {device}")
+    model = Pop2PianoForConditionalGeneration.from_pretrained("./cache/model").to(device)
     processor = Pop2PianoProcessor.from_pretrained("./cache/processor")
     tokenizer = Pop2PianoTokenizer.from_pretrained("./cache/tokenizer")
 
@@ -86,87 +87,104 @@ if __name__ == "__main__":
     optimizer = torch.optim.SGD(model.parameters(), lr=lr, momentum=momentum)
 
     audio_dir = "./processed/audio/"
-    ground_truth_midi_dir = "./processed/piano_midi/"
+    ground_truth_midi_dir = "./processed/midi/"
     cache_dir = "./cache/preprocessed_labels/"
 
     song_names = os.listdir(audio_dir)
     song_names = [".".join(song_name.split(".")[0:-1]) for song_name in song_names]
-    print(song_names)
-
-    for epoch in range(10):
+    # print(song_names)
+    
+    losses = []
+    for epoch in range(400):
       print(f"Epoch {epoch+1}")
-      for song_name in song_names[0:1]:
+      avg_loss = 0
+      epoch_losses = []
+      for song_name in song_names:
           audio_path = f"{audio_dir}{song_name}.ogg"
           ground_truth_midi_path = f"{ground_truth_midi_dir}{song_name}.mid"
-          print(f"Audio file: {audio_path}")
-          print(f"Ground truth midi file: {ground_truth_midi_path}")
+          if not os.path.exists(audio_path) or not os.path.exists(ground_truth_midi_path):
+            continue
+        #   print(f"Audio file: {audio_path}")
+        #   print(f"Ground truth midi file: {ground_truth_midi_path}")
+          try:
 
 
+            #   print("Loading audio file...")
 
-          print("Loading audio file...")
+            if os.path.exists(f"{cache_dir}{song_name}.pkl"):
+                inputs, labels, gt_longest_length = pickle.load(open(f"{cache_dir}{song_name}.pkl", "rb"))
+                #   print("Loaded from cache.")
+                # labels, gt_longest_length = np.load("./cache/preprocessed_labels/Aerosmith - Same Old Song & Dance.npy", allow_pickle=True)
 
-          if os.path.exists(f"{cache_dir}{song_name}.pkl"):
-              inputs, labels, gt_longest_length = pickle.load(open(f"{cache_dir}{song_name}.pkl", "rb"))
-              print("Loaded from cache.")
-              # labels, gt_longest_length = np.load("./cache/preprocessed_labels/Aerosmith - Same Old Song & Dance.npy", allow_pickle=True)
+            else:
+                # audio_path = "./processed/audio/Pat Benatar - Hit Me with Your Best Shot.ogg"
+                audio, sr = librosa.load(audio_path, sr=44100)  # feel free to change the sr to a suitable value.
+                # audio, sr = librosa.load(audio_path, sr=22050)  # feel free to change the sr to a suitable value.
+                #   print("Loaded audio file.\n")
 
-          else:
-              # audio_path = "./processed/audio/Pat Benatar - Hit Me with Your Best Shot.ogg"
-              audio, sr = librosa.load(audio_path, sr=44100)  # feel free to change the sr to a suitable value.
-              # audio, sr = librosa.load(audio_path, sr=22050)  # feel free to change the sr to a suitable value.
-              print("Loaded audio file.\n")
+                sr = int(sr)
 
-              sr = int(sr)
+                # convert the audio file to tokens
+                # inputs = processor(audio=audio, sampling_rate=sr, return_tensors="pt", resample=True)
+                inputs = processor(audio=audio, sampling_rate=sr, return_tensors="pt")
+                #   inputs = {k: v.to(device) for k, v in inputs.items()}
 
-              # convert the audio file to tokens
-              # inputs = processor(audio=audio, sampling_rate=sr, return_tensors="pt", resample=True)
-              inputs = processor(audio=audio, sampling_rate=sr, return_tensors="pt")
-
-
-              # load ground truth midi file
-              # midi = pretty_midi.PrettyMIDI("./processed/midi/Mountain - Mississippi Queen.mid")
-              # ground_truth_midi_path = "mountain_out_gen.mid"
-              print("Encoding ground truth midi file...")
-              # ground_truth_midi_path = "./processed/audio/Aerosmith - Same Old Song and Dance.ogg"
-              midi = pretty_midi.PrettyMIDI(ground_truth_midi_path)
-
-
-              labels, gt_longest_length = preprocess_labels(midi, inputs, tokenizer)
-              pickle.dump((inputs, labels, gt_longest_length), open(f"{cache_dir}{song_name}.pkl", "wb"))
-              # np.save("Aerosmith - Same Old Song & Dance.npy", np.array([labels, gt_longest_length]))
+                # load ground truth midi file
+                # midi = pretty_midi.PrettyMIDI("./processed/midi/Mountain - Mississippi Queen.mid")
+                # ground_truth_midi_path = "mountain_out_gen.mid"
+                #   print("Encoding ground truth midi file...")
+                # ground_truth_midi_path = "./processed/audio/Aerosmith - Same Old Song and Dance.ogg"
+                midi = pretty_midi.PrettyMIDI(ground_truth_midi_path)
 
 
-          # generate model output
-          print("Generating output...")
-          model_output = model.generate(inputs["input_features"], generation_config=model.generation_config, return_dict_in_generate=True, output_logits=True, min_new_tokens=gt_longest_length)
-          print("Completed generation.\n")
+                labels, gt_longest_length = preprocess_labels(midi, inputs, tokenizer)
+                pickle.dump((inputs, labels, gt_longest_length), open(f"{cache_dir}{song_name}.pkl", "wb"))
+                # np.save("Aerosmith - Same Old Song & Dance.npy", np.array([labels, gt_longest_length]))
 
 
-          longest_length = len(model_output.sequences[0])
-          padded_labels = pad_labels(labels, longest_length)
+            # generate model output
+            #   print("Generating output...")
+            inputs = {k: v.to(device) for k, v in inputs.items()}
+            model_output = model.generate(inputs["input_features"], generation_config=model.generation_config, return_dict_in_generate=True, output_logits=True, min_new_tokens=gt_longest_length)
+            #   print("Completed generation.\n")
 
 
-          # print(f"Labels shape:", padded_labels.shape)
+            longest_length = len(model_output.sequences[0])
+            padded_labels = pad_labels(labels, longest_length)
 
-          print("Encoded ground truth midi file.\n")
+
+            # print(f"Labels shape:", padded_labels.shape)
+
+            #   print("Encoded ground truth midi file.\n")
 
 
-          # decode model output
-          print("Decoding output...")
-          tokenizer_output = processor.batch_decode(
-                  token_ids=model_output.sequences,
-                  feature_extractor_output=inputs
-              )
+            # decode model output
+            #   print("Decoding output...")
+            #   tokenizer_output = processor.batch_decode(
+            #           token_ids=model_output.sequences,
+            #           feature_extractor_output=inputs
+            #       )
 
-          logits = torch.stack(model_output.logits).transpose(0,1).requires_grad_()
-          t_labels = torch.tensor(padded_labels)
-          t_labels = t_labels[:,1:]
-          one_hot = one_hot_convert(t_labels, 2400)
+            logits = torch.stack(model_output.logits).transpose(0,1).requires_grad_()
+            t_labels = torch.tensor(padded_labels).to(device)
+            t_labels = t_labels[:,1:]
+            one_hot = one_hot_convert(t_labels, 2400)
+            one_hot = one_hot.to(device)
+            
+            optimizer.zero_grad()
 
-          optimizer.zero_grad()
+            midi_loss = MidiLossCalculator.cross_entropy_loss(logits, one_hot)
+            midi_loss.backward()
+            optimizer.step()
 
-          midi_loss = MidiLossCalculator.cross_entropy_loss(logits, one_hot)
-          midi_loss.backward()
-          optimizer.step()
-
-          print("Loss:", midi_loss.item())
+            avg_loss += midi_loss.item()
+            epoch_losses.append(midi_loss.item())
+            print("Loss:", midi_loss.item())
+          except:
+            print(f"Error in {song_name}")
+            continue
+      losses.append(epoch_losses)
+      np.save("losses.npy", np.array(losses))
+      if (epoch+1) % 5 == 0:
+        model.save_pretrained(f"./models/audio2hero_{epoch+1}")
+      print("Average loss:", avg_loss/len(epoch_losses))
