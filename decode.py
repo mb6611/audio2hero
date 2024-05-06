@@ -1,12 +1,8 @@
 import copy
-from collections import namedtuple
-from types import SimpleNamespace
-import evaluate
 import librosa
 import numpy as np
-from omegaconf import OmegaConf
 import pretty_midi
-from transformers import Pop2PianoForConditionalGeneration, Pop2PianoProcessor, Pop2PianoTokenizer, TrainingArguments, Trainer
+from transformers import Pop2PianoForConditionalGeneration, Pop2PianoProcessor, Pop2PianoTokenizer
 import sys
 sys.path.append("./pop2piano")
 
@@ -84,7 +80,9 @@ if __name__ == "__main__":
     # tokenizer.save_pretrained("./cache/tokenizer")
 
     # load an example audio file and corresponding ground truth midi file
-    audio, sr = librosa.load("./processed/audio/Mountain - Mississippi Queen.ogg", sr=44100)  # feel free to change the sr to a suitable value.
+    # audio_path = "./processed/audio/Mountain - Mississippi Queen.ogg"
+    audio_path = "./processed/audio/Pat Benatar - Hit Me with Your Best Shot.ogg"
+    audio, sr = librosa.load(audio_path, sr=44100)  # feel free to change the sr to a suitable value.
 
     sr = int(sr)
 
@@ -94,7 +92,9 @@ if __name__ == "__main__":
 
     # load ground truth midi file
     # midi = pretty_midi.PrettyMIDI("./processed/midi/Mountain - Mississippi Queen.mid")
-    midi = pretty_midi.PrettyMIDI("mountain_out_gen.mid")
+    # ground_truth_midi_path = "mountain_out_gen.mid"
+    ground_truth_midi_path = "./processed/piano_midi/Pat Benatar - Hit Me with Your Best Shot.mid"
+    midi = pretty_midi.PrettyMIDI(ground_truth_midi_path)
 
 
     # # convert the midi file to tokens
@@ -118,4 +118,5 @@ if __name__ == "__main__":
     print(output)
 
     # # write the decoded midi file
-    output['pretty_midi_objects'][0].write("mountain_out_good.mid")
+    output_file_path = "output.mid"
+    output['pretty_midi_objects'][0].write(output_file_path)
