@@ -102,7 +102,8 @@ if __name__ == "__main__":
     # exit()
 
     # create labels
-    labels = np.array(tokenizer(midi.instruments[0].notes, return_tensors="pt", padding="max_length", max_length=max_length)["token_ids"])
+    # labels = np.array(tokenizer(midi.instruments[0].notes, return_tensors="pt", padding="max_length", max_length=max_length)["token_ids"])
+    labels = np.array(tokenizer(midi.instruments[0].notes, return_tensors="pt")["token_ids"])
     labels = np.array([np.append(labels, np.array([1,0]))]) # pad with EOS token
 
     # print(inputs["beatsteps"])
