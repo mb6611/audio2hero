@@ -88,8 +88,8 @@ if __name__ == "__main__":
     # audio_path = "./processed/audio/Mountain - Mississippi Queen.ogg"
 
     model.train()
-    lr=1e-3
-    momentum=0.2
+    lr=1e-6
+    momentum=0.0
     for param in model.parameters():
         param.requires_grad_(False)
 
@@ -109,6 +109,8 @@ if __name__ == "__main__":
     song_names = [".".join(song_name.split(".")[0:-1]) for song_name in song_names]
     # print(song_names)
     
+    print(song_names[0])
+
     losses = []
     accuracies = []
     for epoch in range(400):
