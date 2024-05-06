@@ -2,7 +2,6 @@ import librosa
 from transformers import Pop2PianoForConditionalGeneration, Pop2PianoProcessor, Pop2PianoTokenizer, Pop2PianoConfig
 import pretty_midi
 from transformers import AutoConfig
-from undecorated import undecorated
 from types import MethodType
 from model_generate import generate
 
@@ -22,7 +21,7 @@ if __name__ == "__main__":
     # og_model = Pop2PianoForConditionalGeneration.from_pretrained("sweetcocoa/pop2piano")
     # generation_config = og_model.generation_config
     # model = Pop2PianoForConditionalGeneration._from_config(config)
-    model = Pop2PianoForConditionalGeneration.from_pretrained("sweetcocoa/pop2piano")
+    model = Pop2PianoForConditionalGeneration.from_pretrained("./models/audio2hero_base_40")
     processor = Pop2PianoProcessor.from_pretrained("sweetcocoa/pop2piano")
     tokenizer = Pop2PianoTokenizer.from_pretrained("sweetcocoa/pop2piano")
 
