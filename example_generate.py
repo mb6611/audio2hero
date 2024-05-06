@@ -18,7 +18,8 @@ if __name__ == "__main__":
     tokenizer = Pop2PianoTokenizer.from_pretrained("sweetcocoa/pop2piano")
 
     # load an example audio file and corresponding ground truth midi file
-    audio, sr = librosa.load("./processed/audio/Mountain - Mississippi Queen.ogg", sr=44100)  # feel free to change the sr to a suitable value.
+    # audio, sr = librosa.load("./processed/audio/Mountain - Mississippi Queen.ogg", sr=44100)  # feel free to change the sr to a suitable value.
+    audio, sr = librosa.load("./processed/audio/Mountain - Mississippi Queen.ogg", sr=22050)  # feel free to change the sr to a suitable value.
 
     # inputs = processor(audio=audio, sampling_rate=sr, return_tensors="pt", resample=False)
     inputs = processor(audio=audio, sampling_rate=sr, return_tensors="pt", resample=True)

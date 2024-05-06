@@ -1,0 +1,121 @@
+import copy
+from collections import namedtuple
+from types import SimpleNamespace
+import evaluate
+import librosa
+import numpy as np
+from omegaconf import OmegaConf
+import pretty_midi
+from transformers import Pop2PianoForConditionalGeneration, Pop2PianoProcessor, Pop2PianoTokenizer, TrainingArguments, Trainer
+import sys
+sys.path.append("./pop2piano")
+
+def midi_to_tokens(midi_obj, tokenizer):
+        """
+        Converts a pretty_midi object to tokens using the provided tokenizer.
+
+        Args:
+            midi_obj (pretty_midi.PrettyMIDI): A pretty_midi object.
+            tokenizer (MidiTokenizer): The tokenizer object to use.
+
+        Returns:
+            np.ndarray: An array of tokens representing the MIDI data.
+        """
+        notes = []
+        for note in midi.instruments[0].notes:
+            onset = note.start
+            offset = note.end
+            # onset = int(note.start * midi_obj.resolution // 24)  # Convert to time step index
+            # offset = int(note.end * midi_obj.resolution // 24)  # Convert to time step index
+            pitch = note.pitch
+            velocity = note.velocity
+            notes.append([onset, offset, pitch, velocity])
+        notes = np.array(notes)
+        # notes = []
+        # for note in midi.instruments[0].notes:
+        #     onset_idx = np.searchsorted(tokenizer.config.beatstep, note.start)
+        #     offset_idx = np.searchsorted(tokenizer.config.beatstep, note.end)
+        #     pitch = note.pitch
+        #     velocity = note.velocity
+        #     notes.append([onset_idx, offset_idx, pitch, velocity])
+        return notes
+
+
+def compute_metrics(eval_pred):
+    logits, labels = eval_pred
+    predictions = np.argmax(logits, axis=-1)
+    return metric.compute(predictions=predictions, references=labels)
+
+
+import copy
+def crop_midi(midi, start_beat, end_beat, extrapolated_beatsteps):
+    start = extrapolated_beatsteps[start_beat]
+    end = extrapolated_beatsteps[end_beat]
+    out = copy.deepcopy(midi)
+    for note in out.instruments[0].notes.copy():
+        if note.start > end or note.start < start:
+            out.instruments[0].notes.remove(note)
+        # interpolate index of start note
+
+        lower = np.argmax(extrapolated_beatsteps[extrapolated_beatsteps <= note.start])
+        note.start = lower
+        note.start = int(note.start - start_beat)
+
+        lower = np.argmax(extrapolated_beatsteps[extrapolated_beatsteps <= note.end])
+        note.end = lower
+        note.end = int(note.end - start_beat)
+    return out
+
+if __name__ == "__main__":
+
+    # load the pretrained model, processor, and tokenizer
+    # model = Pop2PianoForConditionalGeneration.from_pretrained("sweetcocoa/pop2piano")
+    # processor = Pop2PianoProcessor.from_pretrained("sweetcocoa/pop2piano")
+    # tokenizer = Pop2PianoTokenizer.from_pretrained("sweetcocoa/pop2piano")
+
+    model = Pop2PianoForConditionalGeneration.from_pretrained("./cache/model")
+    processor = Pop2PianoProcessor.from_pretrained("./cache/processor")
+    tokenizer = Pop2PianoTokenizer.from_pretrained("./cache/tokenizer")
+
+    print("Loaded pretrained model, processor, and tokenizer.")
+    # cache the model, processor, and tokenizer to avoid downloading them again
+    # model.save_pretrained("./cache/model")
+    # processor.save_pretrained("./cache/processor")
+    # tokenizer.save_pretrained("./cache/tokenizer")
+
+    # load an example audio file and corresponding ground truth midi file
+    audio, sr = librosa.load("./processed/audio/Mountain - Mississippi Queen.ogg", sr=44100)  # feel free to change the sr to a suitable value.
+
+    sr = int(sr)
+
+    # convert the audio file to tokens
+    inputs = processor(audio=audio, sampling_rate=sr, return_tensors="pt", resample=True)
+
+
+    # load ground truth midi file
+    # midi = pretty_midi.PrettyMIDI("./processed/midi/Mountain - Mississippi Queen.mid")
+    midi = pretty_midi.PrettyMIDI("mountain_out_gen.mid")
+
+
+    # # convert the midi file to tokens
+    batches = [crop_midi(midi, i, i+8, inputs.extrapolated_beatstep[0]).instruments[0].notes for i in range(2, len(inputs.extrapolated_beatstep[0])-8, 8)]
+
+    # # remove empty batches
+    batches = [batch for batch in batches if len(batch) > 0]
+
+    labels = [tokenizer(batch, return_tensors="pt")['token_ids'] for batch in batches]
+    labels = [np.append([0], np.append(label, [1, 0])) for label in labels]
+    longest_length = max([len(label) for label in labels])
+    padded_labels = np.array([np.pad(label, (0, longest_length - len(label))) for label in labels])
+
+    padded_labels[padded_labels > 135] = 135
+
+
+    # # decode the tokens
+    tokenizer.num_bars = 2
+    output = tokenizer.batch_decode(np.array(padded_labels),feature_extractor_output=inputs)
+
+    print(output)
+
+    # # write the decoded midi file
+    output['pretty_midi_objects'][0].write("mountain_out_good.mid")
