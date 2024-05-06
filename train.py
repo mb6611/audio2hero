@@ -87,18 +87,18 @@ if __name__ == "__main__":
     # tokenizer.save_pretrained("./cache/tokenizer")
 
     model.train()
-    lr=1e-1
+    lr=1e-3
     momentum=0.5
     for param in model.parameters():
         param.requires_grad_(False)
 
     # unfreeze last few layers
     for name, parameter in model.named_parameters():
-      if any([layer in name for layer in ["block.5.layer.2.DenseReluDense.wo", "decoder.final_layer_norm", "lm_head"]]):
+      if any([layer in name for layer in ["decoder.block.5.layer.2.DenseReluDense.wo", "decoder.final_layer_norm", "lm_head"]]):
         parameter.requires_grad_(True)
 
-    # optimizer = torch.optim.Adam(model.parameters(), lr=lr)
-    optimizer = torch.optim.SGD(model.parameters(), lr=lr, momentum=momentum)
+    optimizer = torch.optim.Adam(model.parameters(), lr=lr)
+    # optimizer = torch.optim.SGD(model.parameters(), lr=lr, momentum=momentum)
 
     audio_dir = "./processed/audio/"
     ground_truth_midi_dir = "./processed/midi/"
@@ -211,6 +211,7 @@ if __name__ == "__main__":
       losses.append(epoch_losses)
       accuracies.append(epoch_accuracies)
       np.save("losses2.npy", np.array(losses))
+      np.save("accuracies2.npy", np.array(accuracies))
       if (epoch+1) % 5 == 0:
         model.save_pretrained(f"./models/audio2hero_base_{epoch+1}")
       print("Average loss:", avg_loss/len(epoch_losses))
