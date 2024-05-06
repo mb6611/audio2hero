@@ -5,6 +5,7 @@ audio, sr = librosa.load("./processed/audio/Aerosmith - Same Old Song & Dance.og
 model = Pop2PianoForConditionalGeneration.from_pretrained("./models/audio2hero_230")
 processor = Pop2PianoProcessor.from_pretrained("sweetcocoa/pop2piano")
 
+
 inputs = processor(audio=audio, sampling_rate=sr, return_tensors="pt")
 model_output = model.generate(input_features=inputs["input_features"])
 tokenizer_output = processor.batch_decode(
