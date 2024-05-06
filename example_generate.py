@@ -42,7 +42,6 @@ if __name__ == "__main__":
     model.generation_config.output_logits = True
     model.generation_config.return_dict_in_generate = True
     model_output = generate(model,inputs["input_features"])
-    print(model_output)
     print("Completed generation.")
 
     # decode model output
