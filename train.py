@@ -80,7 +80,7 @@ if __name__ == "__main__":
 
     model.train()
     lr=1e-3
-    momentum=0.9
+    momentum=0.5
     for param in model.parameters():
         param.requires_grad_(True) # or False
     optimizer = torch.optim.SGD(model.parameters(), lr=lr, momentum=momentum)

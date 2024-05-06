@@ -5,6 +5,9 @@ lib/
 lib64
 pyvenv.cfg
 share/
+venv/
+__pycache__/
+models/
 
 # other repos
 pop2piano
@@ -13,6 +16,11 @@ pop2piano
 Maestro/
 
 # models
-cache/
+cache/*
+!cache/preprocessed_labels/
 
 # generated files
+
+# dataset
+bigdataset/
+/__pycache__
