@@ -3,44 +3,17 @@ import librosa
 import numpy as np
 import pretty_midi
 from transformers import Pop2PianoForConditionalGeneration, Pop2PianoProcessor, Pop2PianoTokenizer
+from encoder import encode_plus
 import sys
 sys.path.append("./pop2piano")
 
-def midi_to_tokens(midi_obj, tokenizer):
-        """
-        Converts a pretty_midi object to tokens using the provided tokenizer.
-
-        Args:
-            midi_obj (pretty_midi.PrettyMIDI): A pretty_midi object.
-            tokenizer (MidiTokenizer): The tokenizer object to use.
-
-        Returns:
-            np.ndarray: An array of tokens representing the MIDI data.
-        """
-        notes = []
-        for note in midi.instruments[0].notes:
-            onset = note.start
-            offset = note.end
-            # onset = int(note.start * midi_obj.resolution // 24)  # Convert to time step index
-            # offset = int(note.end * midi_obj.resolution // 24)  # Convert to time step index
-            pitch = note.pitch
-            velocity = note.velocity
-            notes.append([onset, offset, pitch, velocity])
-        notes = np.array(notes)
-        # notes = []
-        # for note in midi.instruments[0].notes:
-        #     onset_idx = np.searchsorted(tokenizer.config.beatstep, note.start)
-        #     offset_idx = np.searchsorted(tokenizer.config.beatstep, note.end)
-        #     pitch = note.pitch
-        #     velocity = note.velocity
-        #     notes.append([onset_idx, offset_idx, pitch, velocity])
-        return notes
 
 
-def compute_metrics(eval_pred):
-    logits, labels = eval_pred
-    predictions = np.argmax(logits, axis=-1)
-    return metric.compute(predictions=predictions, references=labels)
+
+# def compute_metrics(eval_pred):
+#     logits, labels = eval_pred
+#     predictions = np.argmax(logits, axis=-1)
+#     return metric.compute(predictions=predictions, references=labels)
 
 
 import copy
@@ -60,6 +33,8 @@ def crop_midi(midi, start_beat, end_beat, extrapolated_beatsteps):
         lower = np.argmax(extrapolated_beatsteps[extrapolated_beatsteps <= note.end])
         note.end = lower
         note.end = int(note.end - start_beat)
+        if note.end == note.start:
+            note.end += 1
     return out
 
 if __name__ == "__main__":
@@ -92,6 +67,7 @@ if __name__ == "__main__":
 
     # load ground truth midi file
     # midi = pretty_midi.PrettyMIDI("./processed/midi/Mountain - Mississippi Queen.mid")
+    # ground_truth_midi_path = "./processed/midi/Mountain - Mississippi Queen.mid"
     # ground_truth_midi_path = "mountain_out_gen.mid"
     ground_truth_midi_path = "./processed/piano_midi/Pat Benatar - Hit Me with Your Best Shot.mid"
     midi = pretty_midi.PrettyMIDI(ground_truth_midi_path)
@@ -99,23 +75,27 @@ if __name__ == "__main__":
 
     # # convert the midi file to tokens
     batches = [crop_midi(midi, i, i+8, inputs.extrapolated_beatstep[0]).instruments[0].notes for i in range(2, len(inputs.extrapolated_beatstep[0])-8, 8)]
-
+    print(batches[2])
     # # remove empty batches
-    batches = [batch for batch in batches if len(batch) > 0]
+    # batches = [batch for batch in batches if len(batch) > 0]
 
-    labels = [tokenizer(batch, return_tensors="pt")['token_ids'] for batch in batches]
+    labels = []
+    offset = 0
+    for batch in batches:
+        print(f"outer offset: {offset}")
+        label, offset = encode_plus(tokenizer, batch, return_tensors="pt", time_offset=0)        
+        labels.append(label["token_ids"])
     labels = [np.append([0], np.append(label, [1, 0])) for label in labels]
     longest_length = max([len(label) for label in labels])
     padded_labels = np.array([np.pad(label, (0, longest_length - len(label))) for label in labels])
+    print(padded_labels[2])
 
-    padded_labels[padded_labels > 135] = 135
+    # padded_labels[padded_labels > 135] = 135
 
 
     # # decode the tokens
     tokenizer.num_bars = 2
     output = tokenizer.batch_decode(np.array(padded_labels),feature_extractor_output=inputs)
-
-    print(output)
 
     # # write the decoded midi file
     output_file_path = "output.mid"
