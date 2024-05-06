@@ -86,7 +86,7 @@ if __name__ == "__main__":
     # # remove empty batches
     # batches = [batch for batch in batches if len(batch) > 0]
 
-    model_output = model.generate(inputs["input_features"], generation_config=model.generation_config, return_dict_in_generate=True, output_logits=True, )
+    
 
     labels = []
     offset = 0
@@ -95,7 +95,8 @@ if __name__ == "__main__":
         label, offset = encode_plus(tokenizer, batch, return_tensors="pt", time_offset=0)
         labels.append(label["token_ids"])
     labels = [np.append([0], np.append(label, [1, 0])) for label in labels]
-# longest_length = max([len(label) for label in labels])
+    gt_longest_length = max([len(label) for label in labels])
+    model_output = model.generate(inputs["input_features"], generation_config=model.generation_config, return_dict_in_generate=True, output_logits=True, min_new_tokens=gt_longest_length)
     longest_length = len(model_output.sequences[0])
     padded_labels = np.array([np.pad(label, (0, longest_length - len(label))) for label in labels])
     print(padded_labels[2])

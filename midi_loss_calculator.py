@@ -37,7 +37,7 @@ class MIDILossCalculator:
             self,
             generated_midi_logits: torch.Tensor,
             ground_truth_midi_tokens: torch.Tensor,
-        ) -> torch.nn.CrossEntropyLoss:
+        ):
 
         cross_entropy_loss = torch.nn.CrossEntropyLoss()
         output = cross_entropy_loss(generated_midi_logits, ground_truth_midi_tokens)
@@ -129,11 +129,11 @@ if __name__ == "__main__":
 
     model_output = model.generate(inputs["input_features"], generation_config=model.generation_config, return_dict_in_generate=True, output_logits=True, min_new_tokens=gt_longest_length)
 
+    model_longest_length = len(model_output.sequences[0])
+    padded_labels = pad_labels(labels, model_longest_length)
 
-    padded_labels = pad_labels(labels, gt_longest_length)
 
-
-    # longest_length = len(model_output.sequences[0])
+    # 
     # print(longest_length)
     # padded_labels = np.array([np.pad(label, (0, longest_length - len(label))) for label in labels])
     # print(padded_labels[2])
@@ -177,9 +177,8 @@ if __name__ == "__main__":
     one_hot = one_hot_convert(t_labels, 2400)
     print("One hotted labels.\n")
 
-    print(logits.shape)
-    print(one_hot.shape)
-    exit()
+    print(logits)
+    print(one_hot)
 
     midi_loss = MidiLossCalculator.cross_entropy_loss(logits, one_hot)
     print(midi_loss)
