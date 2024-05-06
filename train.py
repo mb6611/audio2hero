@@ -162,6 +162,7 @@ if __name__ == "__main__":
             # generate model output
             #   print("Generating output...")
             inputs = {k: v.to(device) for k, v in inputs.items()}
+            optimizer.zero_grad()
             model_output = model.generate(inputs["input_features"], return_dict_in_generate=True, output_logits=True, min_new_tokens=gt_longest_length)
             #   print("Completed generation.\n")
 
@@ -187,8 +188,6 @@ if __name__ == "__main__":
             t_labels = t_labels[:,1:]
             one_hot = one_hot_convert(t_labels, 2400)
             one_hot = one_hot.to(device)
-            
-            optimizer.zero_grad()
 
             midi_loss = MidiLossCalculator.cross_entropy_loss(logits, one_hot)
             midi_loss.backward()
