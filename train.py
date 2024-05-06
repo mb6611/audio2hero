@@ -8,6 +8,7 @@ import os
 import pickle
 import pretty_midi
 from transformers import Pop2PianoForConditionalGeneration, Pop2PianoConfig, Pop2PianoProcessor, Pop2PianoTokenizer, TrainingArguments, Trainer
+from model_generate import generate
 import sys
 sys.path.append("./pop2piano")
 
@@ -163,7 +164,10 @@ if __name__ == "__main__":
             #   print("Generating output...")
             inputs = {k: v.to(device) for k, v in inputs.items()}
             optimizer.zero_grad()
-            model_output = model.generate(inputs["input_features"], return_dict_in_generate=True, output_logits=True, min_new_tokens=gt_longest_length)
+            model.generation_config.output_logits = True
+            model.generation_config.return_dict_in_generate = True
+            model.min_new_tokens = gt_longest_length
+            model_output = generate(model,inputs["input_features"])
             #   print("Completed generation.\n")
 
 
