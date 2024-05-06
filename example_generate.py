@@ -21,7 +21,7 @@ if __name__ == "__main__":
     # og_model = Pop2PianoForConditionalGeneration.from_pretrained("sweetcocoa/pop2piano")
     # generation_config = og_model.generation_config
     # model = Pop2PianoForConditionalGeneration._from_config(config)
-    model = Pop2PianoForConditionalGeneration.from_pretrained("sweetcocoa/pop2piano")
+    model = Pop2PianoForConditionalGeneration.from_pretrained("./models/audio2hero_base_195")
     processor = Pop2PianoProcessor.from_pretrained("sweetcocoa/pop2piano")
     tokenizer = Pop2PianoTokenizer.from_pretrained("sweetcocoa/pop2piano")
 
@@ -50,5 +50,5 @@ if __name__ == "__main__":
             feature_extractor_output=inputs
         )
 
-    tokenizer_output["pretty_midi_objects"][0].write("frozen_aero_pretrained.mid")
+    tokenizer_output["pretty_midi_objects"][0].write("frozen_aero.mid")
     print(tokenizer_output.keys())
