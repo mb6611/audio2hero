@@ -7,7 +7,7 @@ import numpy as np
 import os
 import pickle
 import pretty_midi
-from transformers import Pop2PianoForConditionalGeneration, Pop2PianoProcessor, Pop2PianoTokenizer, TrainingArguments, Trainer
+from transformers import Pop2PianoForConditionalGeneration, Pop2PianoConfig, Pop2PianoProcessor, Pop2PianoTokenizer, TrainingArguments, Trainer
 import sys
 sys.path.append("./pop2piano")
 
@@ -65,9 +65,15 @@ if __name__ == "__main__":
     print("Loading pretrained model, processor, and tokenizer...")
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
     print(f"Device: {device}")
-    model = Pop2PianoForConditionalGeneration.from_pretrained("./cache/model").to(device)
-    processor = Pop2PianoProcessor.from_pretrained("./cache/processor")
-    tokenizer = Pop2PianoTokenizer.from_pretrained("./cache/tokenizer")
+    # model = Pop2PianoForConditionalGeneration.from_pretrained("./cache/model").to(device)
+    # processor = Pop2PianoProcessor.from_pretrained("./cache/processor")
+    # tokenizer = Pop2PianoTokenizer.from_pretrained("./cache/tokenizer")
+    config = Pop2PianoConfig.from_pretrained("sweetcocoa/pop2piano")
+    og_model = Pop2PianoForConditionalGeneration.from_pretrained("sweetcocoa/pop2piano")
+    generation_config = og_model.generation_config
+    model = Pop2PianoForConditionalGeneration._from_config(config).to(device)
+    processor = Pop2PianoProcessor.from_pretrained("sweetcocoa/pop2piano")
+    tokenizer = Pop2PianoTokenizer.from_pretrained("sweetcocoa/pop2piano")
 
 
     print("Loaded pretrained model, processor, and tokenizer.\n")
@@ -95,10 +101,12 @@ if __name__ == "__main__":
     # print(song_names)
     
     losses = []
+    accuracies = []
     for epoch in range(400):
       print(f"Epoch {epoch+1}")
       avg_loss = 0
       epoch_losses = []
+      epoch_accuracies = []
       for song_name in song_names:
           audio_path = f"{audio_dir}{song_name}.ogg"
           ground_truth_midi_path = f"{ground_truth_midi_dir}{song_name}.mid"
@@ -145,7 +153,7 @@ if __name__ == "__main__":
             # generate model output
             #   print("Generating output...")
             inputs = {k: v.to(device) for k, v in inputs.items()}
-            model_output = model.generate(inputs["input_features"], generation_config=model.generation_config, return_dict_in_generate=True, output_logits=True, min_new_tokens=gt_longest_length)
+            model_output = model.generate(inputs["input_features"], generation_config=generation_config, return_dict_in_generate=True, output_logits=True, min_new_tokens=gt_longest_length)
             #   print("Completed generation.\n")
 
 
@@ -180,11 +188,17 @@ if __name__ == "__main__":
             avg_loss += midi_loss.item()
             epoch_losses.append(midi_loss.item())
             print("Loss:", midi_loss.item())
+
+            accuracy = torch.sum(model_output.sequences == t_labels).item() / (model_output.sequences.shape[0] * model_output.sequences.shape[1])
+            epoch_accuracies.append(accuracy)
+            print("Accuracy:", accuracy)
           except:
             print(f"Error in {song_name}")
             continue
       losses.append(epoch_losses)
-      np.save("losses.npy", np.array(losses))
+      accuracies.append(epoch_accuracies)
+      np.save("losses2.npy", np.array(losses))
       if (epoch+1) % 5 == 0:
-        model.save_pretrained(f"./models/audio2hero_{epoch+1}")
+        model.save_pretrained(f"./models/audio2hero_base_{epoch+1}")
       print("Average loss:", avg_loss/len(epoch_losses))
+      print("Average accuracy:", np.mean(epoch_accuracies))
