@@ -74,8 +74,8 @@ if __name__ == "__main__":
     # model = Pop2PianoForConditionalGeneration._from_config(config).to(device)
     model = Pop2PianoForConditionalGeneration.from_pretrained("./cache/model").to(device)
     generation_config = model.generation_config
-    processor = Pop2PianoProcessor.from_pretrained("./cache/model")
-    tokenizer = Pop2PianoTokenizer.from_pretrained("./cache/model")
+    processor = Pop2PianoProcessor.from_pretrained("./cache/processor")
+    tokenizer = Pop2PianoTokenizer.from_pretrained("./cache/tokenizer")
 
 
     print("Loaded pretrained model, processor, and tokenizer.\n")
@@ -88,8 +88,8 @@ if __name__ == "__main__":
     # audio_path = "./processed/audio/Mountain - Mississippi Queen.ogg"
 
     model.train()
-    lr=1e-3
-    momentum=0.5
+    lr=1e-2
+    momentum=0.2
     for param in model.parameters():
         param.requires_grad_(False)
 
@@ -116,7 +116,7 @@ if __name__ == "__main__":
       avg_loss = 0
       epoch_losses = []
       epoch_accuracies = []
-      for song_name in song_names:
+      for song_name in song_names[0:2]:
           audio_path = f"{audio_dir}{song_name}.ogg"
           ground_truth_midi_path = f"{ground_truth_midi_dir}{song_name}.mid"
           if not os.path.exists(audio_path) or not os.path.exists(ground_truth_midi_path):
@@ -162,7 +162,7 @@ if __name__ == "__main__":
             # generate model output
             #   print("Generating output...")
             inputs = {k: v.to(device) for k, v in inputs.items()}
-            model_output = model.generate(inputs["input_features"], generation_config=generation_config, return_dict_in_generate=True, output_logits=True, min_new_tokens=gt_longest_length)
+            model_output = model.generate(inputs["input_features"], return_dict_in_generate=True, output_logits=True, min_new_tokens=gt_longest_length)
             #   print("Completed generation.\n")
 
 
@@ -198,11 +198,11 @@ if __name__ == "__main__":
             epoch_losses.append(midi_loss.item())
             print("Loss:", midi_loss.item())
 
-            accuracy = torch.sum(model_output.sequences == t_labels).item() / (model_output.sequences.shape[0] * model_output.sequences.shape[1])
+            accuracy = torch.sum(model_output.sequences == torch.tensor(padded_labels).to(device)).item() / (model_output.sequences.shape[0] * model_output.sequences.shape[1])
             epoch_accuracies.append(accuracy)
             print("Accuracy:", accuracy)
-          except:
-            print(f"Error in {song_name}")
+          except Exception as e:
+            print(f"Error in {song_name}, {e}")
             continue
       losses.append(epoch_losses)
       accuracies.append(epoch_accuracies)
