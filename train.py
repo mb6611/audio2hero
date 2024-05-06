@@ -88,7 +88,7 @@ if __name__ == "__main__":
     # audio_path = "./processed/audio/Mountain - Mississippi Queen.ogg"
 
     model.train()
-    lr=1e-2
+    lr=1e-3
     momentum=0.2
     for param in model.parameters():
         param.requires_grad_(False)
@@ -116,7 +116,7 @@ if __name__ == "__main__":
       avg_loss = 0
       epoch_losses = []
       epoch_accuracies = []
-      for song_name in song_names[0:2]:
+      for song_name in song_names[0:1]:
           audio_path = f"{audio_dir}{song_name}.ogg"
           ground_truth_midi_path = f"{ground_truth_midi_dir}{song_name}.mid"
           if not os.path.exists(audio_path) or not os.path.exists(ground_truth_midi_path):
