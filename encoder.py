@@ -44,7 +44,7 @@ def encode_plus(
 
         # to round up all the values to the closest int values.
         notes = np.round(notes).astype(np.int32)
-        
+
         max_time_idx = notes[:, :2].max()
 
         times = [[] for i in range((max_time_idx + 1))]
@@ -58,7 +58,7 @@ def encode_plus(
         for i, time in enumerate(times):
             if len(time) == 0:
                 continue
-            
+
             tokens.append(tokenizer._convert_token_to_id(i - last_time, "TOKEN_TIME"))
             last_time = i
             for pitch, velocity in time:
