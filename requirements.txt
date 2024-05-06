@@ -22,7 +22,7 @@ decorator==5.1.1
 defusedxml==0.7.1
 dill==0.3.8
 docopt==0.6.2
-essentia==2.1b6.dev1034
+essentia
 evaluate==0.4.2
 exceptiongroup==1.2.1
 executing==2.0.1

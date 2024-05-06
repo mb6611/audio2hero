@@ -5,6 +5,9 @@ lib/
 lib64
 pyvenv.cfg
 share/
+venv/
+__pycache__/
+models/
 
 # other repos
 pop2piano
@@ -16,3 +19,7 @@ Maestro/
 cache/
 
 # generated files
+
+# dataset
+bigdataset/
+/__pycache__
