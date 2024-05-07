@@ -100,6 +100,9 @@ if __name__ == "__main__":
     optimizer = torch.optim.Adam(model.parameters(), lr=lr)
     # optimizer = torch.optim.SGD(model.parameters(), lr=lr, momentum=momentum)
 
+    # print number of parameters
+    print(f"Number of parameters: ", sum(p.numel() for p in model.parameters() if p.requires_grad))
+
     audio_dir = "./processed/audio/"
     ground_truth_midi_dir = "./processed/midi/"
     cache_dir = "./cache/preprocessed_labels/"
@@ -107,8 +110,6 @@ if __name__ == "__main__":
     song_names = os.listdir(audio_dir)
     song_names = [".".join(song_name.split(".")[0:-1]) for song_name in song_names]
     # print(song_names)
-    
-    print(song_names[0])
 
     losses = []
     accuracies = []
@@ -196,7 +197,7 @@ if __name__ == "__main__":
             midi_loss = loss_fct(logits, one_hot)
             midi_loss.backward()
             optimizer.step()
-            
+
 
             avg_loss += midi_loss.item()
             epoch_losses.append(midi_loss.item())

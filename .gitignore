@@ -16,8 +16,13 @@ pop2piano
 Maestro/
 
 # models
+<<<<<<< HEAD
+cache/
+audio2hero_230/
+=======
 cache/*
 !cache/preprocessed_labels/
+>>>>>>> refs/remotes/origin/main
 
 # generated files
 
