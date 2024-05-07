@@ -74,7 +74,7 @@ if __name__ == "__main__":
     # og_model = Pop2PianoForConditionalGeneration.from_pretrained("sweetcocoa/pop2piano")
     # generation_config = og_model.generation_config
     # model = Pop2PianoForConditionalGeneration._from_config(config).to(device)
-    model = Pop2PianoForConditionalGeneration.from_pretrained("./cache/model").to(device)
+    model = Pop2PianoForConditionalGeneration.from_pretrained("./models/audio2hero_adam_15").to(device)
     generation_config = model.generation_config
     processor = Pop2PianoProcessor.from_pretrained("./cache/processor")
     tokenizer = Pop2PianoTokenizer.from_pretrained("./cache/tokenizer")
@@ -112,7 +112,7 @@ if __name__ == "__main__":
 
     losses = []
     accuracies = []
-    for epoch in range(400):
+    for epoch in range(15, 400):
       print(f"Epoch {epoch+1}")
       avg_loss = 0
       epoch_losses = []
@@ -125,6 +125,7 @@ if __name__ == "__main__":
         #   print(f"Audio file: {audio_path}")
         #   print(f"Ground truth midi file: {ground_truth_midi_path}")
           try:
+
 
 
             #   print("Loading audio file...")
@@ -166,8 +167,7 @@ if __name__ == "__main__":
             optimizer.zero_grad()
             model.generation_config.output_logits = True
             model.generation_config.return_dict_in_generate = True
-            model.min_new_tokens = gt_longest_length
-            model_output = generate(model,inputs["input_features"])
+            model_output = generate(model,inputs["input_features"], min_new_tokens=gt_longest_length)
             #   print("Completed generation.\n")
 
 
@@ -206,13 +206,16 @@ if __name__ == "__main__":
             epoch_accuracies.append(accuracy)
             print("Accuracy:", accuracy)
           except Exception as e:
+        #   else:
             print(f"Error in {song_name}, {e}")
+            epoch_losses.append(-1)
+            epoch_accuracies.append(-1)
             continue
       losses.append(epoch_losses)
       accuracies.append(epoch_accuracies)
-      np.save("losses3.npy", np.array(losses))
-      np.save("accuracies3.npy", np.array(accuracies))
+      np.save("losses5.npy", np.array(losses))
+      np.save("accuracies5.npy", np.array(accuracies))
       if (epoch+1) % 5 == 0:
-        model.save_pretrained(f"./models/audio2hero_adam_{epoch+1}")
-      print("Average loss:", avg_loss/len(epoch_losses))
-      print("Average accuracy:", np.mean(epoch_accuracies))
+        model.save_pretrained(f"./models/audio2hero_adam2_{epoch+1}")
+      print("Average loss:", np.mean(epoch_losses[epoch_losses != -1]))
+      print("Average accuracy:", np.mean(epoch_accuracies[epoch_accuracies != -1]))
