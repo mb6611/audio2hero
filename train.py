@@ -74,7 +74,7 @@ if __name__ == "__main__":
     # og_model = Pop2PianoForConditionalGeneration.from_pretrained("sweetcocoa/pop2piano")
     # generation_config = og_model.generation_config
     # model = Pop2PianoForConditionalGeneration._from_config(config).to(device)
-    model = Pop2PianoForConditionalGeneration.from_pretrained("./models/audio2hero_adam_15").to(device)
+    model = Pop2PianoForConditionalGeneration.from_pretrained("./cache/model").to(device)
     generation_config = model.generation_config
     processor = Pop2PianoProcessor.from_pretrained("./cache/processor")
     tokenizer = Pop2PianoTokenizer.from_pretrained("./cache/tokenizer")
@@ -113,7 +113,7 @@ if __name__ == "__main__":
 
     losses = []
     accuracies = []
-    for epoch in range(15, 400):
+    for epoch in range(0, 400):
       print(f"Epoch {epoch+1}")
       avg_loss = 0
       epoch_losses = []
@@ -214,8 +214,8 @@ if __name__ == "__main__":
             continue
       losses.append(epoch_losses)
       accuracies.append(epoch_accuracies)
-      np.save("losses5.npy", np.array(losses))
-      np.save("accuracies5.npy", np.array(accuracies))
+      np.save("losses_scratch_40.npy", np.array(losses))
+      np.save("accuracies_scratch_40.npy", np.array(accuracies))
       if (epoch+1) % 5 == 0:
         model.save_pretrained(f"./models/audio2hero_adam2_{epoch+1}")
       print("Average loss:", np.mean(epoch_losses[epoch_losses != -1]))
