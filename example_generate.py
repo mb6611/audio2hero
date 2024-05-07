@@ -21,14 +21,15 @@ if __name__ == "__main__":
     # og_model = Pop2PianoForConditionalGeneration.from_pretrained("sweetcocoa/pop2piano")
     # generation_config = og_model.generation_config
     # model = Pop2PianoForConditionalGeneration._from_config(config)
-    model = Pop2PianoForConditionalGeneration.from_pretrained("./models/audio2hero_base_50")
+    model = Pop2PianoForConditionalGeneration.from_pretrained("./models/audio2hero_adam2_355")
+    model.eval()
     processor = Pop2PianoProcessor.from_pretrained("sweetcocoa/pop2piano")
     tokenizer = Pop2PianoTokenizer.from_pretrained("sweetcocoa/pop2piano")
 
 
     # load an example audio file and corresponding ground truth midi file
     # audio, sr = librosa.load("./processed/audio/Mountain - Mississippi Queen.ogg", sr=44100)  # feel free to change the sr to a suitable value.
-    audio, sr = librosa.load("./processed/audio/Aerosmith - Same Old Song & Dance.ogg", sr=44100)  # feel free to change the sr to a suitable value.
+    audio, sr = librosa.load("./The Weeknd - Blinding Lights.mp3", sr=44100)  # feel free to change the sr to a suitable value.
 
     # inputs = processor(audio=audio, sampling_rate=sr, return_tensors="pt", resample=False)
     inputs = processor(audio=audio, sampling_rate=sr, return_tensors="pt")
@@ -40,7 +41,7 @@ if __name__ == "__main__":
     print("Generating output...")
     model.generation_config.output_logits = True
     model.generation_config.return_dict_in_generate = True
-    model_output = generate(model,inputs["input_features"])
+    model_output = model.generate(inputs["input_features"])
     print("Completed generation.")
 
     # decode model output
@@ -50,5 +51,5 @@ if __name__ == "__main__":
             feature_extractor_output=inputs
         )
 
-    tokenizer_output["pretty_midi_objects"][0].write("frozen_aero_adam.mid")
+    tokenizer_output["pretty_midi_objects"][0].write("blinding_lights.mid")
     print(tokenizer_output.keys())

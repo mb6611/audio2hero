@@ -17,12 +17,12 @@ Maestro/
 
 # models
 audio2hero_230/
-=======
 cache/*
 !cache/preprocessed_labels/
 
 # generated files
 
 # dataset
-bigdataset/
+bigdataset_unprocessed/
+clonehero_processed/
 /__pycache__
