@@ -1,6 +1,7 @@
 import py_midicsv as pm
 import pandas as pd
 import mido
+import os
 
 
 def midi_preprocess(midi_in, midi_out):
@@ -16,17 +17,19 @@ def midi_preprocess(midi_in, midi_out):
   midi_object = pm.csv_to_midi(csv)
 
   # Save the parsed MIDI file to disk
-  with open("notes_converted.mid", "wb") as output_file:
+  with open(midi_in + "_temp.mid", "wb") as output_file:
       midi_writer = pm.FileWriter(output_file)
       midi_writer.write(midi_object)
 
-  song = mido.MidiFile('notes_converted.mid')
+  song = mido.MidiFile(midi_in + '_temp.mid')
   #remove all tracks without name "PART GUITAR"
   for i, track in enumerate(song.tracks.copy()):
       if "PART GUITAR" not in track.name:
           song.tracks.remove(track)
 
   song.save(midi_out)
+
+  os.remove(midi_in + '_temp.mid')
 
 
 if __name__ == "__main__":
