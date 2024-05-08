@@ -62,8 +62,10 @@ if __name__ == "__main__":
     # directory = "/home/dataset_storage/clonehero/Guitar Hero Tutorials"
     # directory = "/home/dataset_storage/clonehero/Guitar Hero Van Halen" # CRASHED?
     # directory = "/home/dataset_storage/clonehero/Guitar Hero World Tour"
-    directory = "/home/dataset_storage/clonehero/Quickplay"
-    processed_dir = "/home/dataset_storage/clonehero_processed"
+    # directory = "/home/dataset_storage/clonehero/Quickplay"
+    # processed_dir = "/home/dataset_storage/clonehero_processed"
+    directory = "../GHcharter/Guitar Hero III/Quickplay"
+    processed_dir = "./processed/midi_nostrum"
 
     # process_dir(os.listdir(directory)[1])
     with multiprocessing.Pool(processes=multiprocessing.cpu_count()) as pool:
