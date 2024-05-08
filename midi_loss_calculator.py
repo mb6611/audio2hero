@@ -51,7 +51,7 @@ class MIDILossCalculator:
         ):
         pass
 
-def preprocess_labels(midi):
+def preprocess_labels(midi, inputs, tokenizer):
     batches = [crop_midi(midi, i, i+8, inputs.extrapolated_beatstep[0]).instruments[0].notes for i in range(2, len(inputs.extrapolated_beatstep[0])-10, 8)]
 
     labels = []
