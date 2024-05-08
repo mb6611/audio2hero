@@ -23,7 +23,7 @@ if __name__ == "__main__":
     # generation_config = og_model.generation_config
     # model = Pop2PianoForConditionalGeneration._from_config(config)
     device = "cuda" if torch.cuda.is_available() else "cpu"
-    model = Pop2PianoForConditionalGeneration.from_pretrained("./models/audio2hero_adafactor_340").to(device)
+    model = Pop2PianoForConditionalGeneration.from_pretrained("./models/audio2hero_nostrum_35").to(device)
     model.eval()
     processor = Pop2PianoProcessor.from_pretrained("sweetcocoa/pop2piano")
     tokenizer = Pop2PianoTokenizer.from_pretrained("sweetcocoa/pop2piano")
@@ -53,5 +53,5 @@ if __name__ == "__main__":
             feature_extractor_output=inputs
         )
 
-    tokenizer_output["pretty_midi_objects"][0].write("sultans_ada.mid")
+    tokenizer_output["pretty_midi_objects"][0].write("sultans_nostrum.mid")
     print(tokenizer_output.keys())
