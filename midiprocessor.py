@@ -7,7 +7,8 @@ import os
 def midi_preprocess(midi_in, midi_out):
   csv_string = pm.midi_to_csv(midi_in)
   df = pd.DataFrame([x.split(", ") for x in csv_string])
-  notes = ['78','77','76','75','74','73','72','71', None]
+  # notes = ['78','77','76','75','74','73','72','71', None]
+  notes = ['75','74','73','72','71', None] # get rid of strum
   #get rid of notes not in list
   df = df[df[4].isin(notes) | ~(df[2].isin(['Note_on_c', 'Note_off_c']))]
   csv = df.values.tolist()
