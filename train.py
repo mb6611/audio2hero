@@ -123,7 +123,7 @@ if __name__ == "__main__":
       avg_loss = 0
       epoch_losses = []
       epoch_accuracies = []
-      for song_name in song_names[0:1]:
+      for song_name in song_names:
           audio_path = f"{audio_dir}{song_name}.ogg"
           ground_truth_midi_path = f"{ground_truth_midi_dir}{song_name}.mid"
           if not os.path.exists(audio_path) or not os.path.exists(ground_truth_midi_path):
@@ -218,12 +218,12 @@ if __name__ == "__main__":
             continue
       losses.append(epoch_losses)
       accuracies.append(epoch_accuracies)
-      np.save("losses_aero.npy", np.array(losses))
-      np.save("accuracies_aero.npy", np.array(accuracies))
-      if (epoch+1) % 20 == 0:
-        model.save_pretrained(f"./models/audio2hero_aero_{epoch+1}")
+      np.save("losses_adafactor.npy", np.array(losses))
+      np.save("accuracies_adafactor.npy", np.array(accuracies))
+      if (epoch+1) % 5 == 0:
+        model.save_pretrained(f"./models/audio2hero_adafactor_{epoch+1}")
     #   print(epoch_losses!=-1)  
-    #   print("Average loss:", np.mean(epoch_losses[epoch_losses != -1]))
-    #   print("Average accuracy:", np.mean(epoch_accuracies[epoch_accuracies != -1]))
-      print("Average loss:", np.mean(epoch_losses))
-      print("Average accuracy:", np.mean(epoch_accuracies))
+      print("Average loss:", np.mean(epoch_losses[epoch_losses != -1]))
+      print("Average accuracy:", np.mean(epoch_accuracies[epoch_accuracies != -1]))
+    #   print("Average loss:", np.mean(epoch_losses))
+    #   print("Average accuracy:", np.mean(epoch_accuracies))
