@@ -5,7 +5,7 @@ from tqdm import tqdm
 import torch
 
 # feel free to change the sr to a suitable value.
-directory = "./clonehero/audio"
+directory = "./clonehero_processed/audio"
 
 
 start = 0
@@ -26,20 +26,18 @@ for file in tqdm(os.listdir(directory)):
 
   inputs = processor(audio=audio, sampling_rate=sr, return_tensors="pt")
   model_output_hero = model_hero.generate(
-      input_features=inputs["input_features"],
+      input_features=inputs["input_features"].to(device),
   )
+  # print(model_output_hero)
   model_output_pop = model_pop.generate(
-      input_features=inputs["input_features"],
+      input_features=inputs["input_features"].to(device),
   )
-  tokenizer_output_hero = processor.batch_decode(
-      token_ids=model_output_hero, feature_extractor_output=inputs
-  )["pretty_midi_objects"][0]
-  tokenizer_output_pop = processor.batch_decode(
-      token_ids=model_output_pop, feature_extractor_output=inputs
-  )["pretty_midi_objects"][0]
+  # print(model_output_pop)
+  tokenizer_output_hero = processor.batch_decode(model_output_hero.sequences.cpu(), feature_extractor_output=inputs)["pretty_midi_objects"][0]
+  tokenizer_output_pop = processor.batch_decode(model_output_pop.cpu(), feature_extractor_output=inputs)["pretty_midi_objects"][0]
 
   # Since we now have 2 generated MIDI files
-  out_name = file.split(".")[0]+".mid"
-  tokenizer_output_hero.write(f"./clonehero/audio2hero/{out_name}")
-  tokenizer_output_pop.write(f"./clonehero/pop2piano/{out_name}")
-  break
+  out_name = ".".join(file.split(".")[0:-1])+".mid"
+  tokenizer_output_hero.write(f"./clonehero_processed/audio2hero/{out_name}")
+  tokenizer_output_pop.write(f"./clonehero_processed/pop2piano/{out_name}")
+  

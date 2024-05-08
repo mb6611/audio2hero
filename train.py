@@ -8,6 +8,7 @@ import os
 import pickle
 import pretty_midi
 from transformers import Pop2PianoForConditionalGeneration, Pop2PianoConfig, Pop2PianoProcessor, Pop2PianoTokenizer, TrainingArguments, Trainer
+from transformers.optimization import Adafactor, AdafactorSchedule
 from model_generate import generate
 import sys
 sys.path.append("./pop2piano")
@@ -87,7 +88,7 @@ if __name__ == "__main__":
     # tokenizer.save_pretrained("./cache/tokenizer")
 
     model.train()
-    lr=1e-3
+    lr=1e-2
     momentum=0.5
     for param in model.parameters():
         param.requires_grad_(False)
@@ -97,8 +98,12 @@ if __name__ == "__main__":
       if any([layer in name for layer in ["decoder.block.5.layer.2.DenseReluDense.wo", "decoder.final_layer_norm", "lm_head"]]):
         parameter.requires_grad_(True)
 
-    optimizer = torch.optim.Adam(model.parameters(), lr=lr)
+    # optimizer = torch.optim.Adam(model.parameters(), lr=lr)
     # optimizer = torch.optim.SGD(model.parameters(), lr=lr, momentum=momentum)
+    optimizer = Adafactor(model.parameters(), relative_step=True, warmup_init=True, scale_parameter=False)
+
+
+
 
     # print number of parameters
     print(f"Number of parameters: ", sum(p.numel() for p in model.parameters() if p.requires_grad))
@@ -113,12 +118,12 @@ if __name__ == "__main__":
 
     losses = []
     accuracies = []
-    for epoch in range(0, 400):
+    for epoch in range(0, 800):
       print(f"Epoch {epoch+1}")
       avg_loss = 0
       epoch_losses = []
       epoch_accuracies = []
-      for song_name in song_names:
+      for song_name in song_names[0:1]:
           audio_path = f"{audio_dir}{song_name}.ogg"
           ground_truth_midi_path = f"{ground_truth_midi_dir}{song_name}.mid"
           if not os.path.exists(audio_path) or not os.path.exists(ground_truth_midi_path):
@@ -126,9 +131,6 @@ if __name__ == "__main__":
         #   print(f"Audio file: {audio_path}")
         #   print(f"Ground truth midi file: {ground_truth_midi_path}")
           try:
-
-
-
             #   print("Loading audio file...")
 
             if os.path.exists(f"{cache_dir}{song_name}.pkl"):
@@ -194,7 +196,8 @@ if __name__ == "__main__":
             one_hot = one_hot_convert(t_labels, 2400)
             one_hot = one_hot.to(device)
 
-            midi_loss = loss_fct(logits, one_hot)
+            # midi_loss = loss_fct(logits, one_hot)
+            midi_loss = loss_fct(logits.reshape(-1,2400), t_labels.reshape(-1).long())
             midi_loss.backward()
             optimizer.step()
 
@@ -214,9 +217,12 @@ if __name__ == "__main__":
             continue
       losses.append(epoch_losses)
       accuracies.append(epoch_accuracies)
-      np.save("losses_scratch_40.npy", np.array(losses))
-      np.save("accuracies_scratch_40.npy", np.array(accuracies))
-      if (epoch+1) % 5 == 0:
-        model.save_pretrained(f"./models/audio2hero_adam2_{epoch+1}")
-      print("Average loss:", np.mean(epoch_losses[epoch_losses != -1]))
-      print("Average accuracy:", np.mean(epoch_accuracies[epoch_accuracies != -1]))
+      np.save("losses_aero.npy", np.array(losses))
+      np.save("accuracies_aero.npy", np.array(accuracies))
+      if (epoch+1) % 20 == 0:
+        model.save_pretrained(f"./models/audio2hero_aero_{epoch+1}")
+    #   print(epoch_losses!=-1)  
+    #   print("Average loss:", np.mean(epoch_losses[epoch_losses != -1]))
+    #   print("Average accuracy:", np.mean(epoch_accuracies[epoch_accuracies != -1]))
+      print("Average loss:", np.mean(epoch_losses))
+      print("Average accuracy:", np.mean(epoch_accuracies))
