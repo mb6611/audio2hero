@@ -2,7 +2,7 @@ import librosa
 import sys
 sys.path.append("./pop2piano/evaluate")
 import math
-from midi_melody_accuracy import evaluate_melody
+# from midi_melody_accuracy import evaluate_melody
 import numpy as np
 import os
 import pickle

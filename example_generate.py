@@ -4,6 +4,7 @@ import pretty_midi
 from transformers import AutoConfig
 from types import MethodType
 from model_generate import generate
+import torch
 
 # import matplotlib.pyplot as plt
 # import mido
@@ -21,7 +22,8 @@ if __name__ == "__main__":
     # og_model = Pop2PianoForConditionalGeneration.from_pretrained("sweetcocoa/pop2piano")
     # generation_config = og_model.generation_config
     # model = Pop2PianoForConditionalGeneration._from_config(config)
-    model = Pop2PianoForConditionalGeneration.from_pretrained("./models/audio2hero_adam2_355")
+    device = "cuda" if torch.cuda.is_available() else "cpu"
+    model = Pop2PianoForConditionalGeneration.from_pretrained("./models/audio2hero_aero_720").to(device)
     model.eval()
     processor = Pop2PianoProcessor.from_pretrained("sweetcocoa/pop2piano")
     tokenizer = Pop2PianoTokenizer.from_pretrained("sweetcocoa/pop2piano")
@@ -29,7 +31,7 @@ if __name__ == "__main__":
 
     # load an example audio file and corresponding ground truth midi file
     # audio, sr = librosa.load("./processed/audio/Mountain - Mississippi Queen.ogg", sr=44100)  # feel free to change the sr to a suitable value.
-    audio, sr = librosa.load("./The Weeknd - Blinding Lights.mp3", sr=44100)  # feel free to change the sr to a suitable value.
+    audio, sr = librosa.load("./processed/audio/Aerosmith - Same Old Song & Dance.ogg", sr=44100)  # feel free to change the sr to a suitable value.
 
     # inputs = processor(audio=audio, sampling_rate=sr, return_tensors="pt", resample=False)
     inputs = processor(audio=audio, sampling_rate=sr, return_tensors="pt")
@@ -41,15 +43,15 @@ if __name__ == "__main__":
     print("Generating output...")
     model.generation_config.output_logits = True
     model.generation_config.return_dict_in_generate = True
-    model_output = model.generate(inputs["input_features"])
+    model_output = model.generate(inputs["input_features"].to(device))
     print("Completed generation.")
 
     # decode model output
     print("Decoding output...")
     tokenizer_output = processor.batch_decode(
-            token_ids=model_output.sequences,
+            token_ids=model_output.sequences.cpu(),
             feature_extractor_output=inputs
         )
 
-    tokenizer_output["pretty_midi_objects"][0].write("blinding_lights.mid")
+    tokenizer_output["pretty_midi_objects"][0].write("aero_overfit.mid")
     print(tokenizer_output.keys())

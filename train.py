@@ -58,7 +58,7 @@ def compute_metrics(eval_pred):
 if __name__ == "__main__":
 
     # MidiLossCalculator = MIDILossCalculator()
-    loss_fct = torch.nn.CrossEntropyLoss()
+    loss_fct = torch.nn.CrossEntropyLoss(ignore_index=-100)
 
     # load the pretrained model, processor, and tokenizer
     # model = Pop2PianoForConditionalGeneration.from_pretrained("sweetcocoa/pop2piano")
@@ -193,8 +193,9 @@ if __name__ == "__main__":
             logits = torch.stack(model_output.logits).transpose(0,1)
             t_labels = torch.tensor(padded_labels).to(device)
             t_labels = t_labels[:,1:]
-            one_hot = one_hot_convert(t_labels, 2400)
-            one_hot = one_hot.to(device)
+            t_labels = t_labels.masked_fill_(t_labels == 0, -100)
+            # one_hot = one_hot_convert(t_labels, 2400)
+            # one_hot = one_hot.to(device)
 
             # midi_loss = loss_fct(logits, one_hot)
             midi_loss = loss_fct(logits.reshape(-1,2400), t_labels.reshape(-1).long())
