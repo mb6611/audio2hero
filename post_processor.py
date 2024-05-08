@@ -13,7 +13,7 @@ output_dir = "./clonehero"
 # for file in os.listdir("./processed/piano_midi"):
 # song_name = ".".join(file.split(".")[0:-1])
 # song_name = "Dire Straits - Sultans of Swing"
-song_name = "Eric Johnson - Cliffs Of Dover"
+song_name = "Aerosmith - Same Old Song & Dance"
 print(song_name)
 
 if not os.path.exists(f"{output_dir}/{song_name}"):
@@ -24,7 +24,7 @@ shutil.copy(f"./processed/audio/{song_name}.ogg", f"{output_dir}/{song_name}/son
 # shutil.copy(f"./{song_name}.ogg", f"{output_dir}/{song_name}/song.ogg")
 
 # notes = pretty_midi.PrettyMIDI(f"./processed/piano_midi/{file}")
-notes = pretty_midi.PrettyMIDI(f"./cliffs_ada.mid")
+notes = pretty_midi.PrettyMIDI(f"./aero_adac_340.mid")
 
 output = copy.deepcopy(notes)
 output.instruments = []
@@ -42,14 +42,14 @@ for index,note in enumerate(notes.instruments[0].notes):
     #     continue
     last_start = time_start
     # new_pitch = 71 + note.pitch % 5
-    new_pitch = note.pitch 
+    new_pitch = note.pitch
     duration = note.end - note.start
     end = note.start + duration if duration > 0.5 else note.start + 0.1
     new_note = pretty_midi.Note(velocity=100, pitch=new_pitch, start=note.start, end=end)
 
     # if strum
     if note.pitch == 78 and note.start not in note_times:
-        extra_note = pretty_midi.Note(velocity=100, pitch=random.randint(71,74), start=note.start, end=end)
+        extra_note = pretty_midi.Note(velocity=100, pitch=random.randint(71,75), start=note.start, end=end)
         output.instruments[0].notes.append(extra_note)
     # strum = pretty_midi.Note(velocity=100, pitch=78, start=note.start, end=end)
     output.instruments[0].notes.append(new_note)

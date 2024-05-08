@@ -31,7 +31,7 @@ if __name__ == "__main__":
 
     # load an example audio file and corresponding ground truth midi file
     # audio, sr = librosa.load("./processed/audio/Mountain - Mississippi Queen.ogg", sr=44100)  # feel free to change the sr to a suitable value.
-    audio, sr = librosa.load("./processed/audio/Eric Johnson - Cliffs Of Dover.ogg", sr=44100)  # feel free to change the sr to a suitable value.
+    audio, sr = librosa.load("./Dire Straits - Sultans of Swing.ogg", sr=44100)  # feel free to change the sr to a suitable value.
 
     # inputs = processor(audio=audio, sampling_rate=sr, return_tensors="pt", resample=False)
     inputs = processor(audio=audio, sampling_rate=sr, return_tensors="pt")
@@ -53,5 +53,5 @@ if __name__ == "__main__":
             feature_extractor_output=inputs
         )
 
-    tokenizer_output["pretty_midi_objects"][0].write("cliffs_ada.mid")
+    tokenizer_output["pretty_midi_objects"][0].write("sultans_ada.mid")
     print(tokenizer_output.keys())
