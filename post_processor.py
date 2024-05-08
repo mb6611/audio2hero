@@ -25,6 +25,7 @@ shutil.copy(f"./{song_name}.ogg", f"{output_dir}/{song_name}/song.ogg")
 
 # notes = pretty_midi.PrettyMIDI(f"./processed/piano_midi/{file}")
 notes = pretty_midi.PrettyMIDI(f"./sultans_ada.mid")
+# notes = pretty_midi.PrettyMIDI(f"./{song_name}.mid")
 
 output = copy.deepcopy(notes)
 output.instruments = []
