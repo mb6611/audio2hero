@@ -6,29 +6,34 @@ import mido
 import configparser
 import os
 import shutil
+import random
 
 output_dir = "./clonehero"
 
 # for file in os.listdir("./processed/piano_midi"):
 # song_name = ".".join(file.split(".")[0:-1])
 # song_name = "Dire Straits - Sultans of Swing"
-song_name = "The Weeknd - Blinding Lights"
+song_name = "Eric Johnson - Cliffs Of Dover"
 print(song_name)
 
 if not os.path.exists(f"{output_dir}/{song_name}"):
     os.makedirs(f"{output_dir}/{song_name}")
 
 # copy over song
-# shutil.copy(f"./processed/audio/{song_name}.ogg", f"{output_dir}/{song_name}/song.ogg")
-shutil.copy(f"./{song_name}.ogg", f"{output_dir}/{song_name}/song.ogg")
+shutil.copy(f"./processed/audio/{song_name}.ogg", f"{output_dir}/{song_name}/song.ogg")
+# shutil.copy(f"./{song_name}.ogg", f"{output_dir}/{song_name}/song.ogg")
 
 # notes = pretty_midi.PrettyMIDI(f"./processed/piano_midi/{file}")
-notes = pretty_midi.PrettyMIDI(f"./blinding_lights.mid")
+notes = pretty_midi.PrettyMIDI(f"./cliffs_ada.mid")
 
 output = copy.deepcopy(notes)
 output.instruments = []
 output.instruments.append(pretty_midi.Instrument(0, name="PART GUITAR"))
 last_start = 0
+
+note_times = [note.start for note in notes.instruments[0].notes if note.pitch != 78]
+
+
 for index,note in enumerate(notes.instruments[0].notes):
     time_start = note.start
     # if time_start == last_start:
@@ -41,6 +46,11 @@ for index,note in enumerate(notes.instruments[0].notes):
     duration = note.end - note.start
     end = note.start + duration if duration > 0.5 else note.start + 0.1
     new_note = pretty_midi.Note(velocity=100, pitch=new_pitch, start=note.start, end=end)
+
+    # if strum
+    if note.pitch == 78 and note.start not in note_times:
+        extra_note = pretty_midi.Note(velocity=100, pitch=random.randint(71,74), start=note.start, end=end)
+        output.instruments[0].notes.append(extra_note)
     # strum = pretty_midi.Note(velocity=100, pitch=78, start=note.start, end=end)
     output.instruments[0].notes.append(new_note)
     # output.instruments[0].notes.append(strum)
