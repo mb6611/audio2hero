@@ -109,8 +109,8 @@ if __name__ == "__main__":
     print(f"Number of parameters: ", sum(p.numel() for p in model.parameters() if p.requires_grad))
 
     audio_dir = "./processed/audio/"
-    ground_truth_midi_dir = "./processed/midi/"
-    cache_dir = "./cache/preprocessed_labels/"
+    ground_truth_midi_dir = "./processed/midi_nostrum/"
+    cache_dir = "./cache/preprocessed_labels_nostrum/"
 
     song_names = os.listdir(audio_dir)
     song_names = [".".join(song_name.split(".")[0:-1]) for song_name in song_names]
@@ -128,8 +128,6 @@ if __name__ == "__main__":
           ground_truth_midi_path = f"{ground_truth_midi_dir}{song_name}.mid"
           if not os.path.exists(audio_path) or not os.path.exists(ground_truth_midi_path):
             continue
-        #   print(f"Audio file: {audio_path}")
-        #   print(f"Ground truth midi file: {ground_truth_midi_path}")
           try:
             #   print("Loading audio file...")
 
@@ -218,10 +216,10 @@ if __name__ == "__main__":
             continue
       losses.append(epoch_losses)
       accuracies.append(epoch_accuracies)
-      np.save("losses_adafactor.npy", np.array(losses))
-      np.save("accuracies_adafactor.npy", np.array(accuracies))
+      np.save("losses_nostrum.npy", np.array(losses))
+      np.save("accuracies_nostrum.npy", np.array(accuracies))
       if (epoch+1) % 5 == 0:
-        model.save_pretrained(f"./models/audio2hero_adafactor_{epoch+1}")
+        model.save_pretrained(f"./models/audio2hero_nostrum_{epoch+1}")
     #   print(epoch_losses!=-1)  
       print("Average loss:", np.mean(epoch_losses[epoch_losses != -1]))
       print("Average accuracy:", np.mean(epoch_accuracies[epoch_accuracies != -1]))
