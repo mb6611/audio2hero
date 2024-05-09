@@ -220,7 +220,7 @@ if __name__ == "__main__":
       np.save("accuracies_nostrum.npy", np.array(accuracies))
       if (epoch+1) % 5 == 0:
         model.save_pretrained(f"./models/audio2hero_nostrum_{epoch+1}")
-    #   print(epoch_losses!=-1)  
+    #   print(epoch_losses!=-1)
       print("Average loss:", np.mean(epoch_losses[epoch_losses != -1]))
       print("Average accuracy:", np.mean(epoch_accuracies[epoch_accuracies != -1]))
     #   print("Average loss:", np.mean(epoch_losses))

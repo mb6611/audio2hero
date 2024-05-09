@@ -25,6 +25,7 @@ shutil.copy(f"./{song_name}.ogg", f"{output_dir}/{song_name}/song.ogg")
 
 # notes = pretty_midi.PrettyMIDI(f"./processed/piano_midi/{file}")
 notes = pretty_midi.PrettyMIDI(f"./sultans_ada.mid")
+# notes = pretty_midi.PrettyMIDI(f"./{song_name}.mid")
 
 output = copy.deepcopy(notes)
 output.instruments = []
@@ -46,7 +47,7 @@ for index,note in enumerate(notes.instruments[0].notes):
         outofrange+=1
     last_start = time_start
     # new_pitch = 71 + note.pitch % 5
-    new_pitch = note.pitch 
+    new_pitch = note.pitch
     duration = note.end - note.start
     end = note.start + duration if duration > 0.5 else note.start + 0.1
     new_note = pretty_midi.Note(velocity=100, pitch=new_pitch, start=note.start, end=end)
