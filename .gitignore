@@ -7,7 +7,6 @@ pyvenv.cfg
 share/
 venv/
 __pycache__/
-models/
 
 # other repos
 pop2piano
@@ -19,6 +18,7 @@ Maestro/
 audio2hero_230/
 cache/*
 !cache/preprocessed_labels/
+models/
 
 # generated files
 
