@@ -4,7 +4,6 @@ import numpy as np
 import pretty_midi
 import torch
 from transformers import Pop2PianoForConditionalGeneration, Pop2PianoProcessor, Pop2PianoTokenizer
-from typing import List
 
 from decode import crop_midi
 

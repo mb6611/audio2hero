@@ -5,7 +5,6 @@ import copy
 import mido
 import configparser
 import os
-import shutil
 import random
 from mergeoggs import merge
 

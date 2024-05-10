@@ -1,6 +1,6 @@
 import librosa
 from transformers import Pop2PianoForConditionalGeneration, Pop2PianoProcessor
-import os, sys
+import os
 from tqdm import tqdm
 import torch
 

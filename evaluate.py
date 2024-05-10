@@ -71,12 +71,12 @@ def compute_dtw(audio_path, midi_path, output):
                     z = dtw_distance(x,y)
                     song1_result.append(z)
                     print(f"{(song1, song2)}: ", z)
-                except Exception as e:
+                except Exception:
                     song1_result.append(-1)
                     print("Failed to process song: ", song2)
             result_np = np.array(song1_result)
             result.append(result_np / np.linalg.norm(result_np))
-        except Exception as e:
+        except Exception:
             print("Failed to process song: ", song1)
             result.append(np.pad(song1_result, (0, len(audio_paths) - len(song1_result)), 'constant', constant_values=-1))
     pickle.dump(result, open(f"{output}", "wb"))
@@ -122,7 +122,7 @@ def compute_lambda(similarity_function, audio_path, midi_path, output):
                     print("Failed to process song: ", song2)
             result_np = np.array(song1_result)
             result.append(result_np / np.linalg.norm(result_np))
-        except Exception as e:
+        except Exception:
             print("Failed to process song: ", song1)
             result.append(np.pad(song1_result, (0, len(audio_paths) - len(song1_result)), 'constant', constant_values=-1))
     pickle.dump(result, open(f"{output}", "wb"))
@@ -159,11 +159,11 @@ def parallel_process_song(song1, audio_paths, midi_path, similarity_function):
                 if math.isnan(z):
                     raise Exception("nan")
                 song1_result.append(z)
-            except Exception as e:
+            except Exception:
                 song1_result.append(-1)
                 print("Failed to process song: ", song2)
         return song1_result
-    except Exception as e:
+    except Exception:
         print("Failed to process song: ", song1)
         return np.pad(song1_result, (0, len(audio_paths) - len(song1_result)), 'constant', constant_values=-1)
 
@@ -269,7 +269,7 @@ def generate_audio_pickles(audio_path, output_path):
         try:
             audio, _ = librosa.load(os.path.join(audio_path, song), sr=44100)
             pickle.dump(audio, open(os.path.join(output_path, song.replace(".ogg", ".pkl")), "wb"))
-        except Exception as e:
+        except Exception:
             print("Failed to process song: ", song)
 
 if __name__ == "__main__":

@@ -1,7 +1,6 @@
 import pretty_midi
 from matplotlib import pyplot as plt
 import librosa
-import copy
 
 notes = pretty_midi.PrettyMIDI("./clonehero/Aerosmith - Same Old Song & Dance/notes.mid")
 notes.instruments[0].notes = [note for note in notes.instruments[0].notes if note.end < 20]

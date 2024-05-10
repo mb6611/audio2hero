@@ -6,7 +6,6 @@ import mido
 import configparser
 import os
 import shutil
-import random
 
 output_dir = "./clonehero"
 

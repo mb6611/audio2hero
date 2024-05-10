@@ -1,4 +1,5 @@
-import os, sys, shutil
+import os
+import shutil
 from tqdm import tqdm
 from mergeoggs import merge
 from midiprocessor import midi_preprocess

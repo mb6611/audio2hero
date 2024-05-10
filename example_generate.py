@@ -2,7 +2,6 @@ import librosa
 from transformers import Pop2PianoForConditionalGeneration, Pop2PianoProcessor, Pop2PianoTokenizer, Pop2PianoConfig
 import pretty_midi
 from transformers import AutoConfig
-from types import MethodType
 from model_generate import generate
 import torch
 

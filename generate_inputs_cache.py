@@ -1,5 +1,3 @@
-from collections import namedtuple
-from types import SimpleNamespace
 import evaluate
 import librosa
 from midi_loss_calculator import MIDILossCalculator, one_hot_convert, preprocess_labels, pad_labels

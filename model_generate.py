@@ -1,13 +1,11 @@
 import torch
 from transformers.generation.utils import GenerationMixin
-from typing import TYPE_CHECKING, Any, Callable, Dict, List, Optional, Tuple, Union
+from typing import Callable, List, Optional
 from transformers.generation.configuration_utils import GenerationConfig, GenerationMode
 
-import copy
 import inspect
 import warnings
-from dataclasses import dataclass
-from typing import TYPE_CHECKING, Any, Callable, Dict, List, Optional, Tuple, Union
+from typing import Callable, List, Optional
 
 import torch
 import torch.distributed as dist
