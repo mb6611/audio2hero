@@ -10,3 +10,6 @@ To see Audio2Hero working watch our YouTube Demo: [https://www.youtube.com/watch
 
 ## How it works
 To learn more about how our model works, check out our paper: [Paper](https://github.com/mb6611/484-clonehero/blob/691cb37b50aafdca9364e9202a797e27dcf9c903/Audio2Hero%20Paper.pdf)
+
+## Questions?
+We plan to add better documentation to our GitHub so that others can build off of our work, but in the meantime, if you have any questions about our work feel free to reach out over email!
