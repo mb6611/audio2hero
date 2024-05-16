@@ -1,5 +1,4 @@
 import pretty_midi
-from matplotlib import pyplot as plt
 import librosa
 import copy
 import mido
